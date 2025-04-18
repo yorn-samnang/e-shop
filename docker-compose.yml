@@ -1,0 +1,12 @@
+services:
+  frontend:
+    restart: unless-stopped
+    image: csbproj/frontend:v0.0.0
+    build:
+      context: FE
+      dockerfile: dockerfile
+    env_file: FE/.env
+    ports:
+      - "3000:3000"
+
+  # backend:
