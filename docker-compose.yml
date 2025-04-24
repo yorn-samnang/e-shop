@@ -1,12 +1,42 @@
-services:
-  frontend:
-    restart: unless-stopped
-    image: csbproj/frontend:v0.0.0
-    build:
-      context: FE
-      dockerfile: dockerfile
-    env_file: FE/.env
-    ports:
-      - "3000:3000"
+version: '3.8'  # This might show as obsolete but it's still readable
 
-  # backend:
+services:
+  # Existing database service
+  db:
+    image: postgres:14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./BE/.env
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+
+  # Your backend service (modify the existing web service or add a new one)
+  web:
+    build: ./BE
+    command: >
+      bash -c "python manage.py migrate &&
+               python manage.py collectstatic --noinput &&
+               gunicorn ecommerce_project.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - ./BE/src:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - ./BE/.env
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
