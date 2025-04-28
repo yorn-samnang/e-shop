@@ -4,6 +4,7 @@ import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
 import { StoreIcon, CreditCardIcon, MailIcon, PercentIcon, TruckIcon, SaveIcon } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function SettingsPage  ()  {
   const [activeTab, setActiveTab] = useState('store');
@@ -31,7 +32,7 @@ export default function SettingsPage  ()  {
   return <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Settings</h1>
-        <Button icon={<SaveIcon size={16} />}>Save Changes</Button>
+        <Button icon={<SaveIcon size={16} />} onClick={()=>toast.success("Changes Saved")}>Save Changes</Button>
       </div>
       <div className="flex flex-col">
         <div className="lg:col-span-1">

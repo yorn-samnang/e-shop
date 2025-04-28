@@ -53,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <nav className="mt-6">
         <ul className="space-y-2 px-2">
           {navItems.map(item => <li key={item.path}>
-              <Link href={item.path} className={`flex items-center p-3 rounded-md ${pathname.startsWith(item.path) ? 'bg-[#0EA5E9] bg-opacity-20 text-white' : 'hover:text-white hover:bg-gray-700'} ${isOpen ? '' : 'lg:justify-center'}`}>
+              <Link href={item.path} className={`flex items-center p-3 rounded-md ${pathname.startsWith(item.path) ? 'bg-[#0EA5E9] bg-opacity-20 text-white' : 'hover:bg-[#F3F4F6]'} ${isOpen ? '' : 'lg:justify-center'}`}>
                 <span>{item.icon}</span>
                 {isOpen && <span className="ml-3">{item.name}</span>}
               </Link>

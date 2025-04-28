@@ -11,6 +11,7 @@ import {
   ShoppingBagIcon,
   UsersIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Sample data for demo purposes
 const mockOrders = [
@@ -125,6 +126,7 @@ const mockMonthlyData = [
   },
 ];
 export default function Dashboard() {
+  const router = useRouter();
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -190,22 +192,20 @@ export default function Dashboard() {
           <div className="rounded-lg bg-white p-5 shadow">
             <h3 className="mb-4 font-semibold text-lg">Quick Actions</h3>
             <div className="space-y-3">
-              <Button fullWidth icon={<ShoppingBagIcon size={16} />}>
+              <Button
+                fullWidth
+                onClick={() => router.push("/products")}
+                icon={<ShoppingBagIcon size={16} />}
+              >
                 View Products
               </Button>
               <Button
                 fullWidth
                 variant="secondary"
+                onClick={() => router.push("/orders")}
                 icon={<ShoppingBagIcon size={16} />}
               >
                 Manage Orders
-              </Button>
-              <Button
-                fullWidth
-                variant="outline"
-                icon={<UsersIcon size={16} />}
-              >
-                User Management
               </Button>
             </div>
           </div>
@@ -216,4 +216,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
