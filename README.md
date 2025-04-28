@@ -3,8 +3,8 @@
 
 ## Prerequisites
 
-- Node.js
-- pnpm
+- Docker
+- Docker Compose
 
 ## Steps to Run the Project
 
@@ -15,19 +15,15 @@
    cd <project-directory>
    ```
 
-2. Install dependencies using pnpm:
+2. Just run docker:
 
    ```bash
-   pnpm install
+   docker compose --up --build
    ```
 
-3. Start the development server:
-
-   ```bash
-   pnpm dev
-   ```
-
-4. Open your browser and navigate to `http://localhost:3000`.
+3. Open your browser and navigate to
+   - `http://localhost:3001` for the Ecommerce
+   - `http://localhost:3000` for the Admin Panel
 
 ---
 
