@@ -3,6 +3,8 @@
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
 import { StatusPill } from "@/components/common/StatusPill";
+import { api } from "@/lib/axios";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { DownloadIcon, SearchIcon, FilterIcon, EyeIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -65,7 +67,41 @@ const mockOrders = [{
   payment: 'Pending',
   status: 'processing' as const
 }];
+
+export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+
+export interface Order {
+  id: number;
+  user: number;
+  status: OrderStatus;
+  address: string;
+  total: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrderItem {
+  id: number;
+  order: number;
+  product: number;
+  name: string;
+  price: number;
+  quantity: number;
+  subtotal: number;
+}
+
 export default function OrdersPage(){
+
+  const {data} = useQuery({
+    queryKey: ['orders'],
+    queryFn: async () => {
+      const res = await api.get('/api/orders/')
+      console.log(res.data)
+      return res.data
+    }
+  })
+
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const filteredOrders = mockOrders.filter(order => {

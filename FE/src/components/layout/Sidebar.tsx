@@ -19,11 +19,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     name: 'Dashboard',
     path: '/dashboard',
     icon: <LayoutDashboardIcon size={20} />
-  }, {
-    name: 'Users',
-    path: '/users',
-    icon: <UsersIcon size={20} />
-  }, {
+  },
+  //   {
+  //   name: 'Users',
+  //   path: '/users',
+  //   icon: <UsersIcon size={20} />
+  // },
+    {
     name: 'Products',
     path: '/products',
     icon: <ShoppingBagIcon size={20} />
@@ -44,14 +46,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           {isOpen && <span className="ml-2 text-xl font-semibold">E-Admin</span>}
         </div>
-        <button onClick={() => setIsOpen(!isOpen)} className="p-1 rounded-md hover:bg-gray-700 hidden lg:block" aria-label="Toggle sidebar width">
+        <button onClick={() => setIsOpen(!isOpen)} className="p-1 rounded-md hover:text-white  hidden lg:block" aria-label="Toggle sidebar width">
           <ChevronLeftIcon size={20} className={`transition-transform ${isOpen ? '' : 'transform rotate-180'}`} />
         </button>
       </div>
       <nav className="mt-6">
         <ul className="space-y-2 px-2">
           {navItems.map(item => <li key={item.path}>
-              <Link href={item.path} className={`flex items-center p-3 rounded-md ${pathname.startsWith(item.path) ? 'bg-[#0EA5E9] bg-opacity-20 text-white' : 'hover:bg-gray-700'} ${isOpen ? '' : 'lg:justify-center'}`}>
+              <Link href={item.path} className={`flex items-center p-3 rounded-md ${pathname.startsWith(item.path) ? 'bg-[#0EA5E9] bg-opacity-20 text-white' : 'hover:text-white hover:bg-gray-700'} ${isOpen ? '' : 'lg:justify-center'}`}>
                 <span>{item.icon}</span>
                 {isOpen && <span className="ml-3">{item.name}</span>}
               </Link>

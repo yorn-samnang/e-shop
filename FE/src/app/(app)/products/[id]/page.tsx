@@ -232,67 +232,6 @@ export default function ProductDetailPage({ params }: Props) {
                 </div>
               </div>
             )}
-            {/* {activeTab === 'images' && <div className="space-y-6"> */}
-            {/*     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"> */}
-            {/*       {product.images_id.map((image, index) => <div key={index} className="relative group"> */}
-            {/*           <img src={image} alt={`Product ${index + 1}`} className="h-32 w-full object-cover rounded-md border border-gray-200" /> */}
-            {/*           <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2 rounded-md"> */}
-            {/*             <button className="p-1 bg-white rounded-full"> */}
-            {/*               <TrashIcon size={16} className="text-red-600" /> */}
-            {/*             </button> */}
-            {/*           </div> */}
-            {/*           {index === 0 && <div className="absolute top-2 left-2 bg-[#1E40AF] text-white text-xs px-2 py-1 rounded"> */}
-            {/*               Main */}
-            {/*             </div>} */}
-            {/*         </div>)} */}
-            {/*       <div className="border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center h-32 hover:border-[#1E40AF] cursor-pointer"> */}
-            {/*         <div className="flex flex-col items-center text-gray-400 hover:text-[#1E40AF]"> */}
-            {/*           <PlusIcon size={24} /> */}
-            {/*           <span className="text-xs mt-1">Add Image</span> */}
-            {/*         </div> */}
-            {/*       </div> */}
-            {/*     </div> */}
-            {/*   </div>} */}
-            {/* {activeTab === 'categories' && <div className="space-y-6"> */}
-            {/*     <div> */}
-            {/*       <label className="block text-sm font-medium text-gray-700 mb-1"> */}
-            {/*         Categories */}
-            {/*       </label> */}
-            {/*       <div className="flex flex-wrap gap-2 mb-2"> */}
-            {/*         {product.categories.map((category, index) => <div key={index} className="flex items-center bg-gray-100 px-3 py-1 rounded-full text-sm"> */}
-            {/*             {category} */}
-            {/*             <button className="ml-1 text-gray-500 hover:text-gray-700"> */}
-            {/*               <XIcon size={14} /> */}
-            {/*             </button> */}
-            {/*           </div>)} */}
-            {/*       </div> */}
-            {/*       <div className="flex"> */}
-            {/*         <input type="text" className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" placeholder="Add a category" /> */}
-            {/*         <button className="bg-[#1E40AF] text-white px-3 py-2 rounded-r-md"> */}
-            {/*           <PlusIcon size={16} /> */}
-            {/*         </button> */}
-            {/*       </div> */}
-            {/*     </div> */}
-            {/*     <div> */}
-            {/*       <label className="block text-sm font-medium text-gray-700 mb-1"> */}
-            {/*         Tags */}
-            {/*       </label> */}
-            {/*       <div className="flex flex-wrap gap-2 mb-2"> */}
-            {/*         {product.tags.map((tag, index) => <div key={index} className="flex items-center bg-gray-100 px-3 py-1 rounded-full text-sm"> */}
-            {/*             {tag} */}
-            {/*             <button className="ml-1 text-gray-500 hover:text-gray-700"> */}
-            {/*               <XIcon size={14} /> */}
-            {/*             </button> */}
-            {/*           </div>)} */}
-            {/*       </div> */}
-            {/*       <div className="flex"> */}
-            {/*         <input type="text" className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" placeholder="Add a tag" /> */}
-            {/*         <button className="bg-[#1E40AF] text-white px-3 py-2 rounded-r-md"> */}
-            {/*           <PlusIcon size={16} /> */}
-            {/*         </button> */}
-            {/*       </div> */}
-            {/*     </div> */}
-            {/*   </div>} */}
           </Card>
         </div>
         <div className="space-y-6">
