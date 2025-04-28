@@ -18,21 +18,21 @@ services:
   web-admin:
     restart: unless-stopped
     image: csbproj/frontend:v0.0.0
-    build: FE
-    env_file: FE/.env
+    build: AdminDashboard
+    env_file: AdminDashboard/.env
     ports:
       - "3000:3000"
     develop:
       watch:
         - action: sync
-          path: FE
+          path: AdminDashboard
           target: /app
         - action: rebuild
           path: package.json
 
   # Your backend service (modify the existing web service or add a new one)
   backend:
-    build: BE
+    build: Backend
     image: csbproj/backend:v0.0.0
     command: >
       bash -c "python manage.py migrate &&
@@ -46,11 +46,11 @@ services:
     depends_on:
       - db
     env_file:
-      - BE/.env
+      - Backend/.env
     develop:
       watch:
         - action: sync
-          path: BE
+          path: Backend
           target: /app
 
   # Existing database service
@@ -59,7 +59,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - BE/.env
+      - Backend/.env
     ports:
       - "5432:5432"
 
