@@ -1,10 +1,16 @@
 services:
-  web-ecommerce:
+  web-ecommerce-prod:
+    profiles: [prod]
     image: csbproj/ecommerce:v0.0.0
     build:
       context: Ecommerce
       dockerfile: dockerfile
     env_file: Ecommerce/.env
+    depends_on:
+      - db
+      - backend
+    ports:
+      - "3001:3001"
     develop:
       watch:
         - action: sync
@@ -14,28 +20,81 @@ services:
             - node_modules
         - action: rebuild
           path: package.json
+
+  web-admin-prod:
+    profiles: [prod]
+    restart: unless-stopped
+    image: csbproj/frontend:v0.0.0
+    build:
+      context: AdminDashboard
+      dockerfile: dockerfile
+    env_file: AdminDashboard/.env
+    depends_on:
+      - db
+      - backend
+    ports:
+      - "3000:3000"
+    develop:
+      watch:
+        - action: sync
+          path: AdminDashboard
+          target: /app
+        - action: rebuild
+          path: package.json
+
+  web-ecommerce-dev:
+    profiles: [dev]
+    image: csbproj/ecommerce:v0.0.0
+    build:
+      context: Ecommerce
+      dockerfile: dockerfile.dev
+    env_file: Ecommerce/.env
+    depends_on:
+      - db
+      - backend
     ports:
       - "3001:3001"
+    develop:
+      watch:
+        - action: sync
+          path: Ecommerce
+          target: /app
+          ignore:
+            - node_modules
+        - action: rebuild
+          path: package.json
 
-  # Existing database service
-  db:
-    image: postgres:14
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - ./BE/.env
+  web-admin-dev:
+    profiles: [dev]
+    restart: unless-stopped
+    image: csbproj/frontend:v0.0.0
+    build:
+      context: AdminDashboard
+      dockerfile: dockerfile.dev
+    env_file: AdminDashboard/.env
+    depends_on:
+      - db
+      - backend
     ports:
-      - "5432:5432"
+      - "3000:3000"
+    develop:
+      watch:
+        - action: sync
+          path: AdminDashboard
+          target: /app
+        - action: rebuild
+          path: package.json
 
   # Your backend service (modify the existing web service or add a new one)
-  web:
-    build: ./BE
+  backend:
+    profiles: [prod, dev]
+    build: Backend
+    image: csbproj/backend:v0.0.0
     command: >
       bash -c "python manage.py migrate &&
                python manage.py collectstatic --noinput &&
                gunicorn ecommerce_project.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - ./BE/src:/app
       - static_volume:/app/static
       - media_volume:/app/media
     ports:
@@ -43,7 +102,23 @@ services:
     depends_on:
       - db
     env_file:
-      - ./BE/.env
+      - Backend/.env
+    develop:
+      watch:
+        - action: sync
+          path: Backend
+          target: /app
+
+  # Existing database service
+  db:
+    profiles: [prod, dev]
+    image: postgres:14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - Backend/.env
+    ports:
+      - "5432:5432"
 
 volumes:
   postgres_data:
