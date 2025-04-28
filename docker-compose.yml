@@ -1,10 +1,10 @@
 services:
   web-ecommerce:
     image: csbproj/ecommerce:v0.0.0
-    build:
-      context: Ecommerce
-      dockerfile: dockerfile
+    build: Ecommerce
     env_file: Ecommerce/.env
+    ports:
+      - "3001:3001"
     develop:
       watch:
         - action: sync
@@ -14,28 +14,31 @@ services:
             - node_modules
         - action: rebuild
           path: package.json
-    ports:
-      - "3001:3001"
 
-  # Existing database service
-  db:
-    image: postgres:14
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - ./BE/.env
+  web-admin:
+    restart: unless-stopped
+    image: csbproj/frontend:v0.0.0
+    build: FE
+    env_file: FE/.env
     ports:
-      - "5432:5432"
+      - "3000:3000"
+    develop:
+      watch:
+        - action: sync
+          path: FE
+          target: /app
+        - action: rebuild
+          path: package.json
 
   # Your backend service (modify the existing web service or add a new one)
-  web:
-    build: ./BE
+  backend:
+    build: BE
+    image: csbproj/backend:v0.0.0
     command: >
       bash -c "python manage.py migrate &&
                python manage.py collectstatic --noinput &&
                gunicorn ecommerce_project.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - ./BE/src:/app
       - static_volume:/app/static
       - media_volume:/app/media
     ports:
@@ -43,7 +46,22 @@ services:
     depends_on:
       - db
     env_file:
-      - ./BE/.env
+      - BE/.env
+    develop:
+      watch:
+        - action: sync
+          path: BE
+          target: /app
+
+  # Existing database service
+  db:
+    image: postgres:14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - BE/.env
+    ports:
+      - "5432:5432"
 
 volumes:
   postgres_data:

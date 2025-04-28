@@ -9,11 +9,10 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.txt /app/
+COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
-COPY . /app/
+WORKDIR /app/src
 
 # Run gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "ecommerce_project.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "src/ecommerce_project.wsgi:application"]
