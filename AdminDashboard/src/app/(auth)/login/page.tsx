@@ -1,4 +1,7 @@
 "use client";
+import { Button } from "@/components/common/Button";
+import { Card } from "@/components/common/Card";
+import Input from "@/components/ui/Input";
 import { api } from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -13,13 +16,17 @@ const loginFormSchema = z.object({
 type LoginFormSchema = z.infer<typeof loginFormSchema>;
 
 const LoginPage = () => {
-  const { control, handleSubmit, register, formState } =
-    useForm<LoginFormSchema>({
-      resolver: zodResolver(loginFormSchema),
-      mode: "onTouched",
-    });
+  const {
+    control,
+    handleSubmit,
+    register,
+    formState: { errors, isValid },
+  } = useForm<LoginFormSchema>({
+    resolver: zodResolver(loginFormSchema),
+    mode: "onTouched",
+  });
 
-  const loginMutation = useMutation({
+  const { isPending, ...loginMutation } = useMutation({
     mutationKey: ["auth"],
     mutationFn: async (data: LoginFormSchema) => {
       return (await api.post("api/auth/login/", data)).data;
@@ -41,30 +48,52 @@ const LoginPage = () => {
       },
     });
   };
+  const error = !!errors;
   return (
-    <div>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        Login bith
-        <input
-          {...register("email")}
-          type="email"
-          name="email"
-          placeholder="email"
-        />
-        <input
-          {...register("password")}
-          type="password"
-          name="password"
-          placeholder="password"
-        />
-        <button
-          disabled={!formState.isValid}
-          className="cursor-pointer active:bg-black disabled:bg-red-500"
-          type="submit"
-        >
-          Login
-        </button>
-      </form>
+    <div className="flex min-h-screen grow items-center justify-center px-4">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h1 className="mb-2 font-bold text-4xl text-gray-900">
+            Welcome Back
+          </h1>
+          <p className="text-gray-500">
+            Please enter your credentials to continue
+          </p>
+        </div>
+
+        <Card className="p-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <Input
+              label="Email"
+              type="email"
+              fullWidth
+              error={errors.email?.message}
+              {...register("email", {
+                required: "Email is required",
+              })}
+            />
+
+            <Input
+              label="Password"
+              type="password"
+              fullWidth
+              error={errors.password?.message}
+              {...register("password", {
+                required: "Password is required",
+              })}
+            />
+
+            <Button
+              disabled={isPending || !isValid}
+              type="submit"
+              fullWidth
+              size="lg"
+            >
+              Login
+            </Button>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 };
