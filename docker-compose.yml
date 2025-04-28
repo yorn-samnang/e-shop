@@ -1,8 +1,14 @@
 services:
-  web-ecommerce:
+  web-ecommerce-prod:
+    profiles: [prod]
     image: csbproj/ecommerce:v0.0.0
-    build: Ecommerce
+    build:
+      context: Ecommerce
+      dockerfile: dockerfile
     env_file: Ecommerce/.env
+    depends_on:
+      - db
+      - backend
     ports:
       - "3001:3001"
     develop:
@@ -15,11 +21,60 @@ services:
         - action: rebuild
           path: package.json
 
-  web-admin:
+  web-admin-prod:
+    profiles: [prod]
     restart: unless-stopped
     image: csbproj/frontend:v0.0.0
-    build: AdminDashboard
+    build:
+      context: AdminDashboard
+      dockerfile: dockerfile
     env_file: AdminDashboard/.env
+    depends_on:
+      - db
+      - backend
+    ports:
+      - "3000:3000"
+    develop:
+      watch:
+        - action: sync
+          path: AdminDashboard
+          target: /app
+        - action: rebuild
+          path: package.json
+
+  web-ecommerce-dev:
+    profiles: [dev]
+    image: csbproj/ecommerce:v0.0.0
+    build:
+      context: Ecommerce
+      dockerfile: dockerfile.dev
+    env_file: Ecommerce/.env
+    depends_on:
+      - db
+      - backend
+    ports:
+      - "3001:3001"
+    develop:
+      watch:
+        - action: sync
+          path: Ecommerce
+          target: /app
+          ignore:
+            - node_modules
+        - action: rebuild
+          path: package.json
+
+  web-admin-dev:
+    profiles: [dev]
+    restart: unless-stopped
+    image: csbproj/frontend:v0.0.0
+    build:
+      context: AdminDashboard
+      dockerfile: dockerfile.dev
+    env_file: AdminDashboard/.env
+    depends_on:
+      - db
+      - backend
     ports:
       - "3000:3000"
     develop:
@@ -32,6 +87,7 @@ services:
 
   # Your backend service (modify the existing web service or add a new one)
   backend:
+    profiles: [prod, dev]
     build: Backend
     image: csbproj/backend:v0.0.0
     command: >
@@ -55,6 +111,7 @@ services:
 
   # Existing database service
   db:
+    profiles: [prod, dev]
     image: postgres:14
     volumes:
       - postgres_data:/var/lib/postgresql/data/
