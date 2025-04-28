@@ -1,4 +1,22 @@
 services:
+  web-ecommerce:
+    image: csbproj/ecommerce:v0.0.0
+    build:
+      context: Ecommerce
+      dockerfile: dockerfile
+    env_file: Ecommerce/.env
+    develop:
+      watch:
+        - action: sync
+          path: Ecommerce
+          target: /app
+          ignore:
+            - node_modules
+        - action: rebuild
+          path: package.json
+    ports:
+      - "3001:3001"
+
   # Existing database service
   db:
     image: postgres:14
