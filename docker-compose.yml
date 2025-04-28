@@ -1,0 +1,33 @@
+services:
+  # Existing database service
+  db:
+    image: postgres:14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./BE/.env
+    ports:
+      - "5432:5432"
+
+  # Your backend service (modify the existing web service or add a new one)
+  web:
+    build: ./BE
+    command: >
+      bash -c "python manage.py migrate &&
+               python manage.py collectstatic --noinput &&
+               gunicorn ecommerce_project.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - ./BE/src:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - ./BE/.env
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
