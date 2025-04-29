@@ -35,11 +35,10 @@ const AddProductDialog = (props: Props) => {
   const queryClient = useQueryClient();
   const { isPending, ...addProductMutation } = useMutation({
     mutationFn: async (data: Schema) => {
-      const res = await api.post("/api/products/", data, {
+      const newData = { ...data, image_url: data.image_url.item(0) };
+      const res = await api.post("/api/products/", newData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log(data);
-      console.log(res.data);
       return res.data;
     },
     onSuccess: () => {
@@ -119,6 +118,7 @@ const AddProductDialog = (props: Props) => {
               <Input
                 label="Image"
                 type="file"
+                accept="image/*"
                 fullWidth
                 error={errors.name?.message}
                 {...register("image_url", {})}
