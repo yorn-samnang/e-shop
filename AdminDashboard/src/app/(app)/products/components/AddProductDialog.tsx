@@ -12,8 +12,8 @@ import { isValid, z } from "zod";
 const schema = z.object({
   description: z.string().min(1, "Description is required"),
   name: z.string().min(1, "Name is required"),
-  price: z.string().min(1, "Price is required"),
-  in_stock: z.string().min(1, "In stock is required"),
+  price: z.number(),
+  in_stock: z.number(),
   image_url: z.any(),
 });
 
@@ -35,7 +35,10 @@ const AddProductDialog = (props: Props) => {
   const queryClient = useQueryClient();
   const { isPending, ...addProductMutation } = useMutation({
     mutationFn: async (data: Schema) => {
-      const res = await api.post("/api/products/", data);
+      const res = await api.post("/api/products/", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      console.log(data);
       console.log(res.data);
       return res.data;
     },
@@ -43,6 +46,9 @@ const AddProductDialog = (props: Props) => {
       toast.success("Product added successfully");
       queryClient.invalidateQueries({ queryKey: ["products"] });
       props.setOpen(false);
+    },
+    onError: (error) => {
+      console.log(error);
     },
   });
   const onSubmit = (data: Schema) => {
@@ -55,72 +61,82 @@ const AddProductDialog = (props: Props) => {
 
   return (
     <>
-      <div className="absolute inset-0 z-90 flex items-center justify-center bg-[#0000008A] ">
-        <div className="flex min-h-screen grow items-center justify-center px-4">
-          <div className="w-full max-w-md space-y-8">
-            <Card className="px-8 py-4">
-              <div className="text-center">
-                <h1 className="mb-4 font-bold text-2xl text-gray-900">
-                  Add a product!
-                </h1>
-              </div>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <Input
-                  label="Product Name"
-                  type="text"
-                  fullWidth
-                  error={errors.name?.message}
-                  {...register("name", {})}
-                />
+      <div
+        onClick={() => props.setOpen(false)}
+        className="absolute inset-0 z-90 flex items-center justify-center bg-[#0000008A] "
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="w-full max-w-md space-y-8"
+        >
+          <Card className="px-8 py-4">
+            <div className="text-center">
+              <h1 className="mb-4 font-bold text-2xl text-gray-900">
+                Add a product!
+              </h1>
+            </div>
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              encType="multipart/form-data"
+              className="space-y-6"
+            >
+              <Input
+                label="Product Name"
+                type="text"
+                fullWidth
+                error={errors.name?.message}
+                {...register("name")}
+              />
 
-                <Input
-                  label="Product Description"
-                  type="text"
-                  fullWidth
-                  error={errors.description?.message}
-                  {...register("description", {})}
-                />
+              <Input
+                label="Product Description"
+                type="text"
+                fullWidth
+                error={errors.description?.message}
+                {...register("description", {})}
+              />
 
-                <Input
-                  label="Price"
-                  type="number"
-                  fullWidth
-                  error={errors.name?.message}
-                  {...register("price", {})}
-                />
+              <Input
+                label="Price"
+                type="number"
+                fullWidth
+                error={errors.name?.message}
+                {...register("price", {
+                  setValueAs: (v) => Number(v),
+                })}
+              />
 
-                <Input
-                  label="Stock"
-                  type="number"
-                  fullWidth
-                  error={errors.name?.message}
-                  {...register("in_stock", {})}
-                />
+              <Input
+                label="Stock"
+                type="number"
+                fullWidth
+                error={errors.name?.message}
+                {...register("in_stock", {
+                  setValueAs: (v) => Number(v),
+                })}
+              />
 
-                <Input
-                  label="Image"
-                  type="image"
-                  fullWidth
-                  error={errors.name?.message}
-                  {...register("image_url", {})}
-                />
+              <Input
+                label="Image"
+                type="file"
+                fullWidth
+                error={errors.name?.message}
+                {...register("image_url", {})}
+              />
 
-                <Button
-                  disabled={isPending || !isValid}
-                  onClick={handleSubmit(onSubmit)}
-                  type="submit"
-                  fullWidth
-                  size="lg"
-                >
-                  Add Product
-                </Button>
-              </form>
-            </Card>
-          </div>
+              <Button
+                disabled={isPending || !isValid}
+                type="submit"
+                fullWidth
+                size="lg"
+              >
+                Add Product
+              </Button>
+            </form>
+          </Card>
         </div>
       </div>
     </>
   );
 };
-
 export default AddProductDialog;
