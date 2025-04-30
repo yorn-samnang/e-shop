@@ -15,13 +15,21 @@
    cd <project-directory>
    ```
 
-2. Just run docker:
-
+   
+3. Add envs to each folder
    ```bash
-   docker compose --up --build
+   touch AdminDashboard/.env
+   touch Backend/.env
+   touch Ecommerce/.env
    ```
 
-3. Open your browser and navigate to
+3. Just run docker:
+
+   ```bash
+   docker compose --profile=dev up --build
+   ```
+
+4. Open your browser and navigate to
    - `http://localhost:3001` for the Ecommerce
    - `http://localhost:3000` for the Admin Panel
 
