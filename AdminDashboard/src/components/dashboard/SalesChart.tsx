@@ -25,13 +25,13 @@ export const SalesChart: React.FC<SalesChartProps> = ({
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-semibold text-lg">Sales Overview</h3>
         <div className="flex space-x-2">
-          <button onClick={() => setTimeRange('daily')} className={`px-3 py-1 text-sm rounded-md ${timeRange === 'daily' ? 'bg-[#1E40AF] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+          <button onClick={() => setTimeRange('daily')} className={`px-3 py-1 text-sm rounded-md ${timeRange === 'daily' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
             Daily
           </button>
-          <button onClick={() => setTimeRange('weekly')} className={`px-3 py-1 text-sm rounded-md ${timeRange === 'weekly' ? 'bg-[#1E40AF] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+          <button onClick={() => setTimeRange('weekly')} className={`px-3 py-1 text-sm rounded-md ${timeRange === 'weekly' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
             Weekly
           </button>
-          <button onClick={() => setTimeRange('monthly')} className={`px-3 py-1 text-sm rounded-md ${timeRange === 'monthly' ? 'bg-[#1E40AF] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+          <button onClick={() => setTimeRange('monthly')} className={`px-3 py-1 text-sm rounded-md ${timeRange === 'monthly' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
             Monthly
           </button>
         </div>
@@ -48,7 +48,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({
             <XAxis dataKey="name" stroke="#9ca3af" />
             <YAxis stroke="#9ca3af" />
             <Tooltip />
-            <Area type="monotone" dataKey="value" stroke="#0EA5E9" fill="#0EA5E9" fillOpacity={0.2} />
+            <Area type="monotone" dataKey="value" stroke="#C2410C" fill="#C2410C" fillOpacity={0.2} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

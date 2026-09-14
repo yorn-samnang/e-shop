@@ -3,7 +3,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { FiArrowLeft, FiPackage, FiTruck, FiMapPin } from 'react-icons/fi';
 import { ordersAPI } from '@/lib/api';
@@ -18,7 +17,6 @@ export default function OrderDetailPage() {
   const orderId = Number(params.id);
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL || 'http://localhost:8000';
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -40,7 +38,7 @@ export default function OrderDetailPage() {
   }, [orderId]);
 
   // Helper function to safely format price
-  const formatPrice = (price: any): number => {
+  const formatPrice = (price: number | string | null | undefined): number => {
     // If price is already a number, return it
     if (typeof price === 'number') return price;
     
@@ -195,9 +193,8 @@ export default function OrderDetailPage() {
                     <ProductImage 
                       src={item.image_url || '/placeholder-product.jpg'}
                       alt={item.name || 'Product image'}
-                      fill
-                      style={{ objectFit: 'cover' }}
                       priority={true}
+                      className="object-cover"
                       />
                   </Link>
                 </div>
@@ -256,4 +253,3 @@ export default function OrderDetailPage() {
     </div>
   );
 }
-

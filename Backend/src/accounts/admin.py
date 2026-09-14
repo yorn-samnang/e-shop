@@ -20,7 +20,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'username', 'password1', 'password2'),
         }),
     )
-    search_fields = ('email', 'username')
+    search_fields = ('email', 'username', 'google_sub')
     ordering = ('email',)
 
 

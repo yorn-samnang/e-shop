@@ -59,7 +59,7 @@ const OrderItem: React.FC<OrderItemProps> = ({ order }) => {
             </span>
           </div>
           <div className="text-right">
-            <p className="font-medium">${order.total.toFixed(2)}</p>
+            <p className="font-medium">${parseFloat(String(order.total || 0)).toFixed(2)}</p>
           </div>
         </div>
       </div>

@@ -20,6 +20,7 @@ export type Product = {
   price: string;
   in_stock: number;
   image_url: string;
+  category?: 'electronics' | 'clothing' | 'accessories' | 'home' | null;
 };
 export default function ProductsPage() {
   const { data, refetch } = useQuery({
@@ -94,7 +95,7 @@ export default function ProductsPage() {
               <input
                 type="text"
                 placeholder="Search products..."
-                className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-10 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
+                className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-10 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -120,7 +121,7 @@ export default function ProductsPage() {
                   <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-[#1E40AF] focus:ring-[#1E40AF]"
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                       onChange={handleSelectAll}
                       checked={
                         selectedRows.length === products.length &&
@@ -151,7 +152,7 @@ export default function ProductsPage() {
                     <td className="whitespace-nowrap px-6 py-4">
                       <input
                         type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-[#1E40AF] focus:ring-[#1E40AF]"
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                         checked={selectedRows.includes(product.id.toString())}
                         onChange={() => handleSelectRow(product.id.toString())}
                       />
@@ -188,7 +189,7 @@ export default function ProductsPage() {
                       <div className="flex items-center justify-center gap-x-2">
                         <Link
                           href={`/products/${product.id}`}
-                          className="text-[#1E40AF] hover:text-[#1e3a8a]"
+                          className="text-primary hover:text-primary-dark"
                         >
                           <EditIcon size={16} />
                         </Link>

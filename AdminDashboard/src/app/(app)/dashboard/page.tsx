@@ -1,218 +1,122 @@
 "use client";
 
-import { Button } from "@/components/common/Button";
 import { RecentOrdersTable } from "@/components/dashboard/RecentOrdersTable";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { StatsCard } from "@/components/dashboard/StatsCard";
-import {
-  AlertTriangleIcon,
-  DollarSignIcon,
-  PlusIcon,
-  ShoppingBagIcon,
-  UsersIcon,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+import { fetchOrders, fetchProducts, fetchUsers } from "@/utils/quries";
+import { useQuery } from "@tanstack/react-query";
+import { PackageIcon, ShoppingCartIcon, UsersIcon } from "lucide-react";
 
-// Sample data for demo purposes
-const mockOrders = [
-  {
-    id: "1001",
-    date: "2023-06-01",
-    customer: "John Doe",
-    total: "$125.00",
-    status: "delivered" as const,
-  },
-  {
-    id: "1002",
-    date: "2023-06-02",
-    customer: "Jane Smith",
-    total: "$85.50",
-    status: "processing" as const,
-  },
-  {
-    id: "1003",
-    date: "2023-06-03",
-    customer: "Bob Johnson",
-    total: "$220.75",
-    status: "shipped" as const,
-  },
-  {
-    id: "1004",
-    date: "2023-06-04",
-    customer: "Alice Brown",
-    total: "$45.99",
-    status: "pending" as const,
-  },
-  {
-    id: "1005",
-    date: "2023-06-05",
-    customer: "Charlie Wilson",
-    total: "$310.25",
-    status: "cancelled" as const,
-  },
+export type Order = {
+  order_id: number;
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  total: string;
+  created_at: string;
+  address: string;
+  items?: OrderItem[];
+  user_email?: string;
+};
+
+export type OrderItem = {
+  product_id: number;
+  name: string;
+  quantity: number;
+  price: string;
+};
+
+export type User = {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_active: boolean;
+  is_staff: boolean;
+  date_joined: string;
+};
+
+// Placeholder chart data (no time-series endpoint available)
+const emptyChartData = [
+  { name: "Mon", value: 0 },
+  { name: "Tue", value: 0 },
+  { name: "Wed", value: 0 },
+  { name: "Thu", value: 0 },
+  { name: "Fri", value: 0 },
+  { name: "Sat", value: 0 },
+  { name: "Sun", value: 0 },
 ];
-const mockDailyData = [
-  {
-    name: "Mon",
-    value: 1200,
-  },
-  {
-    name: "Tue",
-    value: 1800,
-  },
-  {
-    name: "Wed",
-    value: 1500,
-  },
-  {
-    name: "Thu",
-    value: 2100,
-  },
-  {
-    name: "Fri",
-    value: 2400,
-  },
-  {
-    name: "Sat",
-    value: 1700,
-  },
-  {
-    name: "Sun",
-    value: 1300,
-  },
-];
-const mockWeeklyData = [
-  {
-    name: "Week 1",
-    value: 9500,
-  },
-  {
-    name: "Week 2",
-    value: 12000,
-  },
-  {
-    name: "Week 3",
-    value: 10800,
-  },
-  {
-    name: "Week 4",
-    value: 15000,
-  },
-];
-const mockMonthlyData = [
-  {
-    name: "Jan",
-    value: 42000,
-  },
-  {
-    name: "Feb",
-    value: 38000,
-  },
-  {
-    name: "Mar",
-    value: 45000,
-  },
-  {
-    name: "Apr",
-    value: 50000,
-  },
-  {
-    name: "May",
-    value: 55000,
-  },
-  {
-    name: "Jun",
-    value: 48000,
-  },
-];
-export default function Dashboard() {
-  const router = useRouter();
+
+export default function DashboardPage() {
+  const { data: productsData } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+
+  const { data: ordersData } = useQuery({
+    queryKey: ["orders"],
+    queryFn: fetchOrders,
+  });
+
+  const { data: usersData } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+  });
+
+  const productCount: number =
+    productsData?.count ?? productsData?.results?.length ?? 0;
+  const orders: Order[] = Array.isArray(ordersData)
+    ? ordersData
+    : ordersData?.results ?? [];
+  const orderCount: number = ordersData?.count ?? orders.length;
+  const users: User[] = Array.isArray(usersData)
+    ? usersData
+    : usersData?.results ?? [];
+  const userCount: number = usersData?.count ?? users.length;
+
+  // Map orders to the shape expected by RecentOrdersTable
+  const recentOrders = orders.slice(0, 10).map((o) => ({
+    id: String(o.order_id),
+    date: new Date(o.created_at).toLocaleDateString(),
+    customer: o.user_email ?? "—",
+    total: `$${o.total}`,
+    status: o.status,
+  }));
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-bold text-2xl">Dashboard</h1>
-        <div className="flex space-x-3">
-          <Button variant="outline">Export Data</Button>
-          <Button icon={<PlusIcon size={16} />}>Add Product</Button>
-        </div>
-      </div>
+      <h1 className="font-bold text-2xl">Dashboard</h1>
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         <StatsCard
-          title="Total Sales"
-          value="$48,574.23"
-          icon={<DollarSignIcon size={24} />}
-          trend={{
-            value: 12.5,
-            isPositive: true,
-          }}
-          color="#1E40AF"
+          title="Total Products"
+          value={productCount}
+          icon={<PackageIcon size={22} />}
+          color="#C2410C"
         />
         <StatsCard
-          title="New Orders"
-          value="124"
-          icon={<ShoppingBagIcon size={24} />}
-          trend={{
-            value: 8.2,
-            isPositive: true,
-          }}
-          color="#0EA5E9"
-        />
-        <StatsCard
-          title="Low Stock Items"
-          value="23"
-          icon={<AlertTriangleIcon size={24} />}
-          trend={{
-            value: 2.1,
-            isPositive: false,
-          }}
-          color="#F59E0B"
-        />
-        <StatsCard
-          title="New Users"
-          value="45"
-          icon={<UsersIcon size={24} />}
-          trend={{
-            value: 5.8,
-            isPositive: true,
-          }}
+          title="Total Orders"
+          value={orderCount}
+          icon={<ShoppingCartIcon size={22} />}
           color="#10B981"
         />
+        <StatsCard
+          title="Total Users"
+          value={userCount}
+          icon={<UsersIcon size={22} />}
+          color="#F59E0B"
+        />
       </div>
-      {/* Charts & Tables */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <SalesChart
-            dailyData={mockDailyData}
-            weeklyData={mockWeeklyData}
-            monthlyData={mockMonthlyData}
-          />
-        </div>
-        <div className="lg:col-span-1">
-          <div className="rounded-lg bg-white p-5 shadow">
-            <h3 className="mb-4 font-semibold text-lg">Quick Actions</h3>
-            <div className="space-y-3">
-              <Button
-                fullWidth
-                onClick={() => router.push("/products")}
-                icon={<ShoppingBagIcon size={16} />}
-              >
-                View Products
-              </Button>
-              <Button
-                fullWidth
-                variant="secondary"
-                onClick={() => router.push("/orders")}
-                icon={<ShoppingBagIcon size={16} />}
-              >
-                Manage Orders
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+
+      {/* Sales Chart (placeholder data — no time-series API) */}
+      <SalesChart
+        dailyData={emptyChartData}
+        weeklyData={emptyChartData}
+        monthlyData={emptyChartData}
+      />
+
       {/* Recent Orders */}
-      <RecentOrdersTable orders={mockOrders} />
+      <RecentOrdersTable orders={recentOrders} />
     </div>
   );
 }

@@ -31,6 +31,7 @@ export default function ProductsPage() {
     { id: 'electronics', name: 'Electronics' },
     { id: 'clothing', name: 'Clothing' },
     { id: 'accessories', name: 'Accessories' },
+    { id: 'home', name: 'Home & Kitchen' },
   ];
 
   // Sort options
@@ -41,6 +42,12 @@ export default function ProductsPage() {
     { id: 'name-asc', name: 'Name: A to Z' },
     { id: 'name-desc', name: 'Name: Z to A' },
   ];
+
+  useEffect(() => {
+    setSearch(searchParams.get('search') || '');
+    setCategory(searchParams.get('category') || '');
+    setSortOption(searchParams.get('sort') || 'default');
+  }, [searchParams]);
 
   useEffect(() => {
     let isMounted = true;
@@ -217,7 +224,7 @@ export default function ProductsPage() {
           <div className="mt-4 flex items-center justify-between">
             <div className="text-sm text-gray-600">
               {filteredProducts.length} products found
-              {search && <span> for "{search}"</span>}
+              {search && <span> for &quot;{search}&quot;</span>}
               {category && <span> in {categories.find(c => c.id === category)?.name}</span>}
               {sortOption !== 'default' && <span> sorted by {sortOptions.find(s => s.id === sortOption)?.name}</span>}
             </div>

@@ -10,9 +10,9 @@ import Button from '@/components/ui/Button';
 
 
 export default function CartPage() {
-  const { items, totalItems, isLoading } = useCart();
+  const { items, totalItems, isInitializing } = useCart();
 
-  if (isLoading) {
+  if (isInitializing) {
     return (
       <div className="animate-pulse">
         <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
@@ -35,7 +35,7 @@ export default function CartPage() {
       <div className="text-center py-12">
         <FiShoppingBag className="mx-auto h-12 w-12 text-gray-400 mb-4" />
         <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
-        <p className="text-gray-600 mb-6">Looks like you haven't added anything to your cart yet.</p>
+        <p className="text-gray-600 mb-6">Looks like you haven&apos;t added anything to your cart yet.</p>
         <Link href="/products">
           <Button>
             Start Shopping

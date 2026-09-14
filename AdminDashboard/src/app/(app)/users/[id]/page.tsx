@@ -1,213 +1,159 @@
 "use client";
+
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
-import { ArrowLeftIcon, SaveIcon, UserIcon, ShoppingBagIcon } from "lucide-react";
+import { api } from "@/lib/axios";
+import { fetchUser } from "@/utils/quries";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import toast from "react-hot-toast";
 
-export default function UserDetailPage  ()  {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
-  // In a real application, you would fetch user data based on the ID
-  const user = {
-    id,
-    username: 'johndoe',
-    email: 'john@example.com',
-    firstName: 'John',
-    lastName: 'Doe',
-    registrationDate: '2023-01-15',
-    status: 'active',
-    role: 'Admin',
-    phone: '+1 (555) 123-4567',
-    address: '123 Main St, Anytown, USA'
-  };
-  const recentOrders = [{
-    id: '1001',
-    date: '2023-06-01',
-    total: '$125.00',
-    status: 'delivered'
-  }, {
-    id: '1002',
-    date: '2023-05-15',
-    total: '$85.50',
-    status: 'delivered'
-  }, {
-    id: '1003',
-    date: '2023-04-22',
-    total: '$220.75',
-    status: 'delivered'
-  }];
-  return <div className="space-y-6">
+export type User = {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_active: boolean;
+  is_staff: boolean;
+  date_joined: string;
+};
+
+export default function UserDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+
+  const { data, isPending } = useQuery({
+    queryKey: ["user", id],
+    queryFn: () => fetchUser(id),
+  });
+
+  const user: User | undefined = data;
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: async (is_active: boolean) => {
+      const res = await api.patch(`/api/auth/admin/users/${id}/`, {
+        is_active,
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", id] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("User updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update user");
+    },
+  });
+
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center py-20 text-gray-500">
+        Loading…
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center py-20 text-gray-500">
+        User not found.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <Link href="/users" className="mr-4 p-1 rounded-md hover:bg-gray-100">
+          <Link href="/users" className="mr-4 rounded-md p-1 hover:bg-gray-100">
             <ArrowLeftIcon size={20} />
           </Link>
-          <h1 className="text-2xl font-bold">User Details</h1>
-        </div>
-        <div className="flex space-x-3">
-          <Button variant="outline">Cancel</Button>
-          <Button icon={<SaveIcon size={16} />}>Save Changes</Button>
+          <h1 className="font-bold text-2xl">User #{user.id}</h1>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card title="Personal Information">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name
-                </label>
-                <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" defaultValue={user.firstName} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name
-                </label>
-                <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" defaultValue={user.lastName} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input type="email" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" defaultValue={user.email} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
-                <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" defaultValue={user.phone} />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
-                </label>
-                <textarea className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" rows={3} defaultValue={user.address} />
-              </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* User Info */}
+        <Card title="User Information">
+          <div className="space-y-4 text-sm">
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-500">Username</span>
+              <span className="text-gray-900">{user.username}</span>
             </div>
-          </Card>
-          <Card title="Account Settings">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
-                <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" defaultValue={user.username} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Role
-                </label>
-                <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" defaultValue={user.role}>
-                  <option value="Admin">Admin</option>
-                  <option value="Customer">Customer</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  New Password
-                </label>
-                <input type="password" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" placeholder="Leave blank to keep current" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm Password
-                </label>
-                <input type="password" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" placeholder="Leave blank to keep current" />
-              </div>
-              <div className="md:col-span-2">
-                <div className="flex items-center">
-                  <input id="status" type="checkbox" className="h-4 w-4 text-[#1E40AF] focus:ring-[#1E40AF] border-gray-300 rounded" defaultChecked={user.status === 'active'} />
-                  <label htmlFor="status" className="ml-2 block text-sm text-gray-900">
-                    Active Account
-                  </label>
-                </div>
-              </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-500">Email</span>
+              <span className="text-gray-900">{user.email}</span>
             </div>
-          </Card>
-          <Card title="Permissions">
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <input id="perm-products" type="checkbox" className="h-4 w-4 text-[#1E40AF] focus:ring-[#1E40AF] border-gray-300 rounded" defaultChecked />
-                <label htmlFor="perm-products" className="ml-2 block text-sm text-gray-900">
-                  Manage Products
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input id="perm-orders" type="checkbox" className="h-4 w-4 text-[#1E40AF] focus:ring-[#1E40AF] border-gray-300 rounded" defaultChecked />
-                <label htmlFor="perm-orders" className="ml-2 block text-sm text-gray-900">
-                  Manage Orders
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input id="perm-users" type="checkbox" className="h-4 w-4 text-[#1E40AF] focus:ring-[#1E40AF] border-gray-300 rounded" defaultChecked />
-                <label htmlFor="perm-users" className="ml-2 block text-sm text-gray-900">
-                  Manage Users
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input id="perm-settings" type="checkbox" className="h-4 w-4 text-[#1E40AF] focus:ring-[#1E40AF] border-gray-300 rounded" defaultChecked />
-                <label htmlFor="perm-settings" className="ml-2 block text-sm text-gray-900">
-                  Manage Settings
-                </label>
-              </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-500">First Name</span>
+              <span className="text-gray-900">{user.first_name || "—"}</span>
             </div>
-          </Card>
-        </div>
-        <div className="space-y-6">
-          <Card>
-            <div className="flex flex-col items-center">
-              <div className="h-24 w-24 rounded-full bg-[#1E293B] flex items-center justify-center text-white mb-4">
-                <UserIcon size={48} />
-              </div>
-              <h3 className="text-lg font-medium">
-                {user.firstName} {user.lastName}
-              </h3>
-              <p className="text-sm text-gray-500">{user.email}</p>
-              <p className="text-xs text-gray-400 mt-1">
-                Member since {user.registrationDate}
-              </p>
-              <div className="mt-6 w-full">
-                <Button fullWidth variant="outline">
-                  Change Avatar
-                </Button>
-              </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-500">Last Name</span>
+              <span className="text-gray-900">{user.last_name || "—"}</span>
             </div>
-          </Card>
-          <Card title="Recent Orders">
-            <div className="space-y-3">
-              {recentOrders.map(order => <div key={order.id} className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50">
-                  <div className="flex items-center">
-                    <ShoppingBagIcon size={16} className="text-gray-400 mr-2" />
-                    <div>
-                      <p className="text-sm font-medium">Order #{order.id}</p>
-                      <p className="text-xs text-gray-500">{order.date}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{order.total}</p>
-                    <p className="text-xs text-green-600">{order.status}</p>
-                  </div>
-                </div>)}
-              <Link href="/orders" className="text-sm text-[#1E40AF] hover:underline block text-center mt-4">
-                View All Orders
-              </Link>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-500">Role</span>
+              <span className="text-gray-900">
+                {user.is_staff ? "Admin" : "Customer"}
+              </span>
             </div>
-          </Card>
-          <Card>
-            <div className="space-y-4">
-              <Button fullWidth variant="danger">
-                Delete User
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-500">Status</span>
+              <span
+                className={`font-medium ${user.is_active ? "text-green-600" : "text-gray-500"}`}
+              >
+                {user.is_active ? "Active" : "Inactive"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium text-gray-500">Joined</span>
+              <span className="text-gray-900">
+                {new Date(user.date_joined).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+        </Card>
+
+        {/* Actions */}
+        <Card title="Account Actions">
+          <div className="space-y-4">
+            <p className="text-gray-600 text-sm">
+              {user.is_active
+                ? "This account is currently active. You can deactivate it to prevent the user from logging in."
+                : "This account is currently inactive. Activate it to allow the user to log in."}
+            </p>
+            {user.is_active ? (
+              <Button
+                variant="danger"
+                fullWidth
+                disabled={toggleActiveMutation.isPending}
+                onClick={() => toggleActiveMutation.mutate(false)}
+              >
+                {toggleActiveMutation.isPending
+                  ? "Saving…"
+                  : "Deactivate Account"}
               </Button>
-              <Button fullWidth variant="outline">
-                Impersonate User
+            ) : (
+              <Button
+                variant="success"
+                fullWidth
+                disabled={toggleActiveMutation.isPending}
+                onClick={() => toggleActiveMutation.mutate(true)}
+              >
+                {toggleActiveMutation.isPending
+                  ? "Saving…"
+                  : "Activate Account"}
               </Button>
-            </div>
-          </Card>
-        </div>
+            )}
+          </div>
+        </Card>
       </div>
-    </div>;
-};
+    </div>
+  );
+}

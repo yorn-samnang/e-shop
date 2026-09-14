@@ -12,7 +12,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, fullWidth = false, className = '', ...props }, ref) => {
     const inputStyles = `
       px-3 py-2 rounded-md border border-gray-300 
-      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+      focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
       ${error ? 'border-red-500 focus:ring-red-500' : ''}
       ${fullWidth ? 'w-full' : ''}
       ${className}

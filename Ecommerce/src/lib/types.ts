@@ -3,6 +3,10 @@ export interface User {
     id: number;
     username: string;
     email: string;
+    first_name: string;
+    last_name: string;
+    profile_image: string;
+    is_staff: boolean;
   }
   
   export interface RegisterData {
@@ -22,21 +26,25 @@ export interface User {
   }
   
   // Product Types
-  export interface Product {
+export interface Product {
     id: number;
     name: string;
     description?: string;
     price: number;
     image_url?: string;
     in_stock: number;
+    category?: ProductCategory;
   }
+
+export type ProductCategory = 'electronics' | 'clothing' | 'accessories' | 'home';
   
-  export interface ProductData {
+export interface ProductData {
     name: string;
     description: string;
     price: number;
     image_url?: string;
     stock: number;
+    category?: ProductCategory;
   }
   
   // Cart Types
@@ -59,6 +67,7 @@ export interface User {
     name: string;
     quantity: number;
     price: number;
+    image_url?: string;
   }
   
   export interface Order {
@@ -80,3 +89,15 @@ export interface User {
   export interface OrderCreateData {
     address: string;
   }
+
+// Banner Types
+export interface Banner {
+  id: number;
+  title: string;
+  subtitle?: string;
+  image: string;
+  button_label?: string;
+  button_link?: string;
+  is_active: boolean;
+  order: number;
+}

@@ -29,7 +29,7 @@ const LoginPage = () => {
   const { isPending, ...loginMutation } = useMutation({
     mutationKey: ["auth"],
     mutationFn: async (data: LoginFormSchema) => {
-      return (await api.post("api/auth/login/", data)).data;
+      return (await api.post("/api/auth/login/", data)).data;
     },
   });
 
@@ -50,9 +50,14 @@ const LoginPage = () => {
   };
   const error = !!errors;
   return (
-    <div className="flex min-h-screen grow items-center justify-center px-4">
+    <div className="flex min-h-screen grow items-center justify-center bg-brand-surface/40 px-4 dark:bg-slate-950">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
+          <img
+            src="/logo.png"
+            alt="E-Shop"
+            className="mx-auto mb-5 h-20 w-20 object-contain"
+          />
           <h1 className="mb-2 font-bold text-4xl text-gray-900">
             Welcome Back
           </h1>

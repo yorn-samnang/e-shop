@@ -3,154 +3,169 @@
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
 import { StatusPill } from "@/components/common/StatusPill";
-import {
-  ArrowLeftIcon,
-  CheckIcon,
-  ClockIcon,
-  MailIcon,
-  PrinterIcon,
-  TruckIcon,
-  XIcon,
-} from "lucide-react";
+import { api } from "@/lib/axios";
+import { fetchOrder } from "@/utils/quries";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeftIcon, SaveIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
+
+export type OrderItem = {
+  product_id: number;
+  name: string;
+  quantity: number;
+  price: string;
+};
+
+export type Order = {
+  order_id: number;
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  total: string;
+  created_at: string;
+  address: string;
+  items?: OrderItem[];
+  user_email?: string;
+};
+
+type Status = Order["status"];
+
+const STATUS_OPTIONS: Status[] = [
+  "pending",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+];
 
 export default function OrderDetailPage() {
-  const { id } = useParams<{
-    id: string;
-  }>();
-  // In a real application, you would fetch order data based on the ID
-  const order = {
-    id,
-    date: "2023-06-01 14:30",
-    customer: {
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "+1 (555) 123-4567",
+  const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+
+  const { data, isPending } = useQuery({
+    queryKey: ["order", id],
+    queryFn: () => fetchOrder(id),
+  });
+
+  const order: Order | undefined = data;
+
+  const [selectedStatus, setSelectedStatus] = useState<Status | "">("");
+
+  // Sync local status select once data loads
+  const currentStatus = (selectedStatus || order?.status) as Status | "";
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async (status: Status) => {
+      const res = await api.patch(`/api/orders/admin/${id}/`, { status });
+      return res.data;
     },
-    payment: {
-      method: "Credit Card",
-      cardLast4: "4242",
-      status: "Paid",
-      date: "2023-06-01 14:35",
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order", id] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success("Order status updated");
     },
-    items: [
-      {
-        id: "1",
-        name: "Premium Wireless Headphones",
-        price: "$149.99",
-        quantity: 1,
-        total: "$149.99",
-        sku: "HDX-100",
-      },
-      {
-        id: "2",
-        name: "Wireless Charging Pad",
-        price: "$29.99",
-        quantity: 2,
-        total: "$59.98",
-        sku: "CHG-PAD-01",
-      },
-    ],
-    subtotal: "$209.97",
-    shipping: "$9.99",
-    tax: "$17.50",
-    discount: "-$20.00",
-    total: "$217.46",
-    status: "shipped" as const,
-    timeline: [
-      {
-        date: "2023-06-01 14:30",
-        status: "Order Placed",
-        icon: <ClockIcon size={16} />,
-      },
-      {
-        date: "2023-06-01 14:35",
-        status: "Payment Received",
-        icon: <CheckIcon size={16} />,
-      },
-      {
-        date: "2023-06-02 09:20",
-        status: "Processing",
-        icon: <ClockIcon size={16} />,
-      },
-      {
-        date: "2023-06-03 11:15",
-        status: "Shipped",
-        icon: <TruckIcon size={16} />,
-      },
-    ],
-  };
+    onError: () => {
+      toast.error("Failed to update order status");
+    },
+  });
+
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center py-20 text-gray-500">
+        Loading…
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="flex items-center justify-center py-20 text-gray-500">
+        Order not found.
+      </div>
+    );
+  }
+
+  const items: OrderItem[] = order.items ?? [];
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <Link
-            href="/orders"
-            className="mr-4 rounded-md p-1 hover:bg-gray-100"
-          >
+          <Link href="/orders" className="mr-4 rounded-md p-1 hover:bg-gray-100">
             <ArrowLeftIcon size={20} />
           </Link>
-          <h1 className="font-bold text-2xl">Order #{id}</h1>
-        </div>
-        <div className="flex space-x-3">
-          <Button variant="outline" icon={<PrinterIcon size={16} />}>
-            Print
-          </Button>
-          <Button icon={<MailIcon size={16} />}>Email Invoice</Button>
+          <h1 className="font-bold text-2xl">Order #{order.order_id}</h1>
         </div>
       </div>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
+          {/* Status & Info */}
           <Card>
             <div className="mb-4 flex flex-col border-b pb-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="flex items-center">
+                <div className="mb-1 flex items-center gap-3">
                   <h3 className="font-medium text-lg">Order Status</h3>
                   <StatusPill status={order.status} />
                 </div>
-                <p className="text-gray-500 text-sm">Placed on {order.date}</p>
-              </div>
-              <div className="mt-2 md:mt-0">
-                <select
-                  className="rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
-                  defaultValue={order.status}
-                >
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+                <p className="text-gray-500 text-sm">
+                  Placed on{" "}
+                  {new Date(order.created_at).toLocaleString()}
+                </p>
               </div>
             </div>
-            <div className="space-y-8">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
-                  <h4 className="mb-2 font-medium">Customer Information</h4>
-                  <div className="space-y-1 text-sm">
-                    <p>{order.customer.name}</p>
-                    <p>{order.customer.email}</p>
-                    <p>{order.customer.phone}</p>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="mb-2 font-medium">Shipping Address</h4>
-                </div>
+
+            {/* Status editor */}
+            <div className="mb-6">
+              <h4 className="mb-2 font-medium text-sm">Update Status</h4>
+              <div className="flex items-center gap-3">
+                <select
+                  className="rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+                  value={currentStatus}
+                  onChange={(e) =>
+                    setSelectedStatus(e.target.value as Status)
+                  }
+                >
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  icon={<SaveIcon size={14} />}
+                  disabled={
+                    updateStatusMutation.isPending ||
+                    currentStatus === order.status
+                  }
+                  onClick={() => {
+                    if (currentStatus)
+                      updateStatusMutation.mutate(currentStatus as Status);
+                  }}
+                >
+                  {updateStatusMutation.isPending ? "Saving…" : "Save"}
+                </Button>
+              </div>
+            </div>
+
+            {/* Customer & Address */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div>
+                <h4 className="mb-2 font-medium">Customer</h4>
+                <p className="text-gray-700 text-sm">
+                  {order.user_email ?? "—"}
+                </p>
               </div>
               <div>
-                <h4 className="mb-2 font-medium">Payment Information</h4>
-                <div className="space-y-1 text-sm">
-                  <p>
-                    {order.payment.method} ending in {order.payment.cardLast4}
-                  </p>
-                  <p>
-                    {order.payment.status} on {order.payment.date}
-                  </p>
-                </div>
+                <h4 className="mb-2 font-medium">Shipping Address</h4>
+                <p className="text-gray-700 text-sm">{order.address || "—"}</p>
               </div>
             </div>
           </Card>
+
+          {/* Order Items */}
           <Card>
             <h3 className="mb-4 font-medium text-lg">Order Items</h3>
             <div className="overflow-x-auto">
@@ -161,112 +176,88 @@ export default function OrderDetailPage() {
                       Product
                     </th>
                     <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                      Price
+                      Unit Price
                     </th>
                     <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                       Quantity
                     </th>
                     <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                      Total
+                      Subtotal
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {order.items.map((item) => (
-                    <tr key={item.id}>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <div className="font-medium text-gray-900 text-sm">
-                          {item.name}
-                        </div>
-                        <div className="text-gray-500 text-sm">
-                          SKU: {item.sku}
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-gray-500 text-sm">
-                        {item.price}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-gray-500 text-sm">
-                        {item.quantity}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 font-medium text-sm">
-                        {item.total}
+                  {items.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="px-6 py-4 text-center text-gray-500 text-sm"
+                      >
+                        No items.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    items.map((item) => {
+                      const subtotal = (
+                        parseFloat(item.price) * item.quantity
+                      ).toFixed(2);
+                      return (
+                        <tr key={item.product_id}>
+                          <td className="whitespace-nowrap px-6 py-4">
+                            <div className="font-medium text-gray-900 text-sm">
+                              {item.name}
+                            </div>
+                            <div className="text-gray-500 text-xs">
+                              ID: {item.product_id}
+                            </div>
+                          </td>
+                          <td className="whitespace-nowrap px-6 py-4 text-gray-500 text-sm">
+                            ${item.price}
+                          </td>
+                          <td className="whitespace-nowrap px-6 py-4 text-gray-500 text-sm">
+                            {item.quantity}
+                          </td>
+                          <td className="whitespace-nowrap px-6 py-4 font-medium text-sm">
+                            ${subtotal}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
-            <div className="mt-6 border-t pt-4">
-              <div className="flex justify-between py-1">
-                <span className="text-gray-500 text-sm">Subtotal</span>
-                <span className="text-sm">{order.subtotal}</span>
+
+            {/* Total */}
+            <div className="mt-4 border-t pt-4">
+              <div className="flex justify-between font-bold">
+                <span>Order Total</span>
+                <span>${order.total}</span>
               </div>
-              <div className="flex justify-between py-1">
-                <span className="text-gray-500 text-sm">Shipping</span>
-                <span className="text-sm">{order.shipping}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-gray-500 text-sm">Tax</span>
-                <span className="text-sm">{order.tax}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-gray-500 text-sm">Discount</span>
-                <span className="text-red-600 text-sm">{order.discount}</span>
-              </div>
-              <div className="mt-2 flex justify-between border-t py-2 font-bold">
-                <span>Total</span>
-                <span>{order.total}</span>
-              </div>
-            </div>
-          </Card>
-          <Card>
-            <h3 className="mb-4 font-medium text-lg">Notes</h3>
-            <textarea
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
-              rows={3}
-              placeholder="Add a note about this order..."
-            />
-            <div className="mt-2">
-              <Button>Add Note</Button>
             </div>
           </Card>
         </div>
+
+        {/* Sidebar summary */}
         <div className="space-y-6">
-          <Card>
-            <h3 className="mb-4 font-medium text-lg">Order Timeline</h3>
-            <div className="space-y-4">
-              {order.timeline.map((event, index) => (
-                <div key={index} className="flex">
-                  <div className="mr-3">
-                    <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full ${index === order.timeline.length - 1 ? "bg-[#1E40AF] text-white" : "bg-gray-100"}`}
-                    >
-                      {event.icon}
-                    </div>
-                    {index < order.timeline.length - 1 && (
-                      <div className="mx-auto h-8 w-px bg-gray-200" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium">{event.status}</p>
-                    <p className="text-gray-500 text-xs">{event.date}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-          <Card>
-            <h3 className="mb-4 font-medium text-lg">Quick Actions</h3>
-            <div className="space-y-3">
-              <Button fullWidth icon={<TruckIcon size={16} />}>
-                Update Tracking
-              </Button>
-              <Button fullWidth variant="outline" icon={<MailIcon size={16} />}>
-                Contact Customer
-              </Button>
-              <Button fullWidth variant="danger" icon={<XIcon size={16} />}>
-                Cancel Order
-              </Button>
+          <Card title="Order Summary">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Order ID</span>
+                <span className="font-medium">#{order.order_id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Date</span>
+                <span>{new Date(order.created_at).toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Status</span>
+                <StatusPill status={order.status} />
+              </div>
+              <div className="flex justify-between border-t pt-3 font-bold">
+                <span>Total</span>
+                <span>${order.total}</span>
+              </div>
             </div>
           </Card>
         </div>

@@ -12,8 +12,69 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
+  signInWithGoogle: (credential: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (data: { username?: string; first_name?: string; last_name?: string; profile_image?: string }) => Promise<void>;
 }
+
+type GoogleCredentialResponse = {
+  credential?: string;
+};
+
+export type GoogleIdentityService = {
+  accounts: {
+    id: {
+      initialize: (configuration: { client_id: string; callback: (response: GoogleCredentialResponse) => void }) => void;
+      renderButton: (
+        parent: HTMLElement,
+        options: {
+          type?: 'standard' | 'icon';
+          theme?: 'outline' | 'filled_blue' | 'filled_black';
+          size?: 'large' | 'medium' | 'small';
+          text?: 'signin_with' | 'signup_with' | 'continue_with' | 'signin';
+          shape?: 'rectangular' | 'pill' | 'circle' | 'square';
+          logo_alignment?: 'left' | 'center';
+          width?: number;
+        },
+      ) => void;
+    };
+  };
+};
+
+declare global {
+  interface Window {
+    google?: GoogleIdentityService;
+  }
+}
+
+let googleIdentityScript: Promise<GoogleIdentityService> | undefined;
+
+export const loadGoogleIdentityService = () => {
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('Google sign-in is only available in a browser.'));
+  }
+
+  if (window.google) {
+    return Promise.resolve(window.google);
+  }
+
+  if (!googleIdentityScript) {
+    googleIdentityScript = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => window.google ? resolve(window.google) : reject(new Error('Google sign-in could not be initialized.'));
+      script.onerror = () => {
+        googleIdentityScript = undefined;
+        reject(new Error('Google sign-in could not be loaded. Check your internet connection and try again.'));
+      };
+      document.head.appendChild(script);
+    });
+  }
+
+  return googleIdentityScript;
+};
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -21,13 +82,23 @@ export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   login: async () => {},
   register: async () => {},
+  signInWithGoogle: async () => {},
   logout: () => {},
+  updateProfile: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  const startNavigationLoading = () => {
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('route-navigation-start'));
+  };
+
+  const stopNavigationLoading = () => {
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('route-navigation-end'));
+  };
   
 
   // Check if user is logged in on initial load
@@ -51,27 +122,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
+    startNavigationLoading();
     try {
-      console.log('Attempting login with credentials:', { email: credentials.email, password: '[REDACTED]' });
       const response = await authAPI.login(credentials);
-      console.log('Login successful, response:', response.data);
-      
       const { token } = response.data;
       localStorage.setItem('token', token);
-      console.log('Token saved to localStorage');
-      
-      // Get user profile after successful login
-      console.log('Fetching user profile...');
+
       const profileResponse = await authAPI.getProfile();
-      console.log('Profile response:', profileResponse.data);
       setUser(profileResponse.data);
-      
-      console.log('Redirecting to home page...');
       router.push('/');
-    } catch (error: any) {
-      console.error('Full login error details:', error);
-      console.error('Response data:', error.response?.data);
-      console.error('Status code:', error.response?.status);
+    } catch (error: unknown) {
+      stopNavigationLoading();
       throw error;
     } finally {
       setIsLoading(false);
@@ -80,36 +141,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (userData: RegisterData) => {
     setIsLoading(true);
+    startNavigationLoading();
     try {
-      console.log('Starting registration with data:', userData);
       const response = await authAPI.register(userData);
-      console.log('Registration successful, response:', response.data);
-      
       const { token } = response.data;
       localStorage.setItem('token', token);
-      console.log('Token saved to localStorage');
-      
-      // Set user from response or fetch profile
+
       if (response.data.user) {
-        console.log('Using user data from response:', response.data.user);
         setUser(response.data.user);
       } else {
-        console.log('Fetching user profile via API call...');
         try {
           const profileResponse = await authAPI.getProfile();
-          console.log('Profile fetched successfully:', profileResponse.data);
           setUser(profileResponse.data);
         } catch (profileError) {
           console.error('Error fetching profile:', profileError);
-          // Continue with redirection even if profile fetch fails
         }
       }
-      
-      console.log('Redirecting to home page...');
-      // Use window.location for a full page refresh if router doesn't work
+
       window.location.href = '/';
     } catch (error) {
       console.error('Registration error:', error);
+      stopNavigationLoading();
       throw error;
     } finally {
       setIsLoading(false);
@@ -122,6 +174,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push('/auth/login');
   };
 
+  const updateProfile = async (data: { username?: string; first_name?: string; last_name?: string; profile_image?: string }) => {
+    const response = await authAPI.updateProfile(data);
+    setUser(response.data);
+  };
+
+  const signInWithGoogle = async (credential: string) => {
+    setIsLoading(true);
+    startNavigationLoading();
+    try {
+      const response = await authAPI.googleLogin(credential);
+      localStorage.setItem('token', response.data.token);
+      setUser(response.data.user);
+      router.push('/');
+    } catch (error) {
+      stopNavigationLoading();
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -130,11 +203,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated: !!user,
         login,
         register,
+        signInWithGoogle,
         logout,
+        updateProfile,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
-

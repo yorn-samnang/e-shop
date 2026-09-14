@@ -38,7 +38,7 @@ export default function SettingsPage  ()  {
         <div className="lg:col-span-1">
           <Card>
             <nav className="space-y-1 flex">
-              {tabs.map(tab => <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center px-4 py-3 rounded-md w-full text-left ${activeTab === tab.id ? 'bg-[#0EA5E9] bg-opacity-10 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+              {tabs.map(tab => <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center px-4 py-3 rounded-md w-full text-left ${activeTab === tab.id ? 'bg-primary bg-opacity-10 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                   <span className="mr-3">{tab.icon}</span>
                   <span className="font-medium">{tab.label}</span>
                 </button>)}
@@ -53,7 +53,7 @@ export default function SettingsPage  ()  {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Store Name
                   </label>
-                  <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" defaultValue="My Awesome Store" />
+                  <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" defaultValue="My Awesome Store" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -72,7 +72,7 @@ export default function SettingsPage  ()  {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Store Currency
                   </label>
-                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" defaultValue="USD">
+                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" defaultValue="USD">
                     <option value="USD">USD - US Dollar</option>
                     <option value="EUR">EUR - Euro</option>
                     <option value="GBP">GBP - British Pound</option>
@@ -84,7 +84,7 @@ export default function SettingsPage  ()  {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Default Language
                   </label>
-                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" defaultValue="en-US">
+                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" defaultValue="en-US">
                     <option value="en-US">English (United States)</option>
                     <option value="en-GB">English (United Kingdom)</option>
                     <option value="es">Spanish</option>
@@ -96,19 +96,19 @@ export default function SettingsPage  ()  {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Store Address
                   </label>
-                  <textarea className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" rows={3} defaultValue="123 Main St, Anytown, CA 12345, United States" />
+                  <textarea className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" rows={3} defaultValue="123 Main St, Anytown, CA 12345, United States" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Contact Email
                   </label>
-                  <input type="email" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" defaultValue="contact@mystore.com" />
+                  <input type="email" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" defaultValue="contact@mystore.com" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Contact Phone
                   </label>
-                  <input type="tel" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" defaultValue="+1 (555) 123-4567" />
+                  <input type="tel" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" defaultValue="+1 (555) 123-4567" />
                 </div>
               </div>
             </Card>}
@@ -120,7 +120,7 @@ export default function SettingsPage  ()  {
                 <div className="border rounded-md p-4">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
-                      <input id="stripe" type="checkbox" className="h-4 w-4 text-[#0EA5E9] focus:ring-[#0EA5E9] border-gray-300 rounded" defaultChecked />
+                      <input id="stripe" type="checkbox" className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" defaultChecked />
                       <label htmlFor="stripe" className="ml-2 block text-sm font-medium text-gray-900">
                         Stripe
                       </label>
@@ -134,20 +134,20 @@ export default function SettingsPage  ()  {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Publishable Key
                       </label>
-                      <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" defaultValue="pk_test_..." />
+                      <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" defaultValue="pk_test_..." />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Secret Key
                       </label>
-                      <input type="password" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" defaultValue="sk_test_..." />
+                      <input type="password" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" defaultValue="sk_test_..." />
                     </div>
                   </div>
                 </div>
                 <div className="border rounded-md p-4">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
-                      <input id="paypal" type="checkbox" className="h-4 w-4 text-[#0EA5E9] focus:ring-[#0EA5E9] border-gray-300 rounded" />
+                      <input id="paypal" type="checkbox" className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" />
                       <label htmlFor="paypal" className="ml-2 block text-sm font-medium text-gray-900">
                         PayPal
                       </label>
@@ -161,13 +161,13 @@ export default function SettingsPage  ()  {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Client ID
                       </label>
-                      <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" placeholder="Enter PayPal client ID" />
+                      <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter PayPal client ID" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Client Secret
                       </label>
-                      <input type="password" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" placeholder="Enter PayPal client secret" />
+                      <input type="password" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter PayPal client secret" />
                     </div>
                   </div>
                 </div>
@@ -184,13 +184,13 @@ export default function SettingsPage  ()  {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Subject
                       </label>
-                      <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" defaultValue="Your order #{{order_number}} has been confirmed" />
+                      <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" defaultValue="Your order #{{order_number}} has been confirmed" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Template
                       </label>
-                      <textarea className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent font-mono text-sm" rows={8} defaultValue={`Dear {{customer_name}},
+                      <textarea className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm" rows={8} defaultValue={`Dear {{customer_name}},
 Thank you for your order! We've received your order #{{order_number}} and it is now being processed.
 Order Details:
 {{order_items}}
@@ -212,13 +212,13 @@ The Team at My Awesome Store`} />
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Subject
                       </label>
-                      <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" defaultValue="Your order #{{order_number}} has shipped" />
+                      <input type="text" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" defaultValue="Your order #{{order_number}} has shipped" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Template
                       </label>
-                      <textarea className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent font-mono text-sm" rows={8} defaultValue={`Dear {{customer_name}},
+                      <textarea className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm" rows={8} defaultValue={`Dear {{customer_name}},
 Great news! Your order #{{order_number}} has been shipped.
 Tracking Number: {{tracking_number}}
 Carrier: {{shipping_carrier}}
@@ -241,7 +241,7 @@ The Team at My Awesome Store`} />
               <div className="space-y-6">
                 <div>
                   <div className="flex items-center mb-4">
-                    <input id="enable-tax" type="checkbox" className="h-4 w-4 text-[#0EA5E9] focus:ring-[#0EA5E9] border-gray-300 rounded" defaultChecked />
+                    <input id="enable-tax" type="checkbox" className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" defaultChecked />
                     <label htmlFor="enable-tax" className="ml-2 block text-sm font-medium text-gray-900">
                       Enable Tax Calculations
                     </label>
@@ -251,7 +251,7 @@ The Team at My Awesome Store`} />
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Tax Calculation Based On
                   </label>
-                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent" defaultValue="shipping">
+                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" defaultValue="shipping">
                     <option value="shipping">Customer Shipping Address</option>
                     <option value="billing">Customer Billing Address</option>
                     <option value="store">Store Address</option>
@@ -292,7 +292,7 @@ The Team at My Awesome Store`} />
               <div className="space-y-6">
                 <div>
                   <div className="flex items-center mb-4">
-                    <input id="enable-shipping" type="checkbox" className="h-4 w-4 text-[#0EA5E9] focus:ring-[#0EA5E9] border-gray-300 rounded" defaultChecked />
+                    <input id="enable-shipping" type="checkbox" className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" defaultChecked />
                     <label htmlFor="enable-shipping" className="ml-2 block text-sm font-medium text-gray-900">
                       Enable Shipping
                     </label>
@@ -304,7 +304,7 @@ The Team at My Awesome Store`} />
                     <div className="border rounded-md p-4">
                       <div className="flex justify-between mb-2">
                         <div className="flex items-center">
-                          <input id="standard-shipping" type="checkbox" className="h-4 w-4 text-[#0EA5E9] focus:ring-[#0EA5E9] border-gray-300 rounded" defaultChecked />
+                          <input id="standard-shipping" type="checkbox" className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" defaultChecked />
                           <label htmlFor="standard-shipping" className="ml-2 block font-medium">
                             Standard Shipping
                           </label>
@@ -318,7 +318,7 @@ The Team at My Awesome Store`} />
                     <div className="border rounded-md p-4">
                       <div className="flex justify-between mb-2">
                         <div className="flex items-center">
-                          <input id="express-shipping" type="checkbox" className="h-4 w-4 text-[#0EA5E9] focus:ring-[#0EA5E9] border-gray-300 rounded" defaultChecked />
+                          <input id="express-shipping" type="checkbox" className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" defaultChecked />
                           <label htmlFor="express-shipping" className="ml-2 block font-medium">
                             Express Shipping
                           </label>
@@ -332,7 +332,7 @@ The Team at My Awesome Store`} />
                     <div className="border rounded-md p-4">
                       <div className="flex justify-between mb-2">
                         <div className="flex items-center">
-                          <input id="free-shipping" type="checkbox" className="h-4 w-4 text-[#0EA5E9] focus:ring-[#0EA5E9] border-gray-300 rounded" defaultChecked />
+                          <input id="free-shipping" type="checkbox" className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" defaultChecked />
                           <label htmlFor="free-shipping" className="ml-2 block font-medium">
                             Free Shipping
                           </label>
