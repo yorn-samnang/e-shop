@@ -53,13 +53,17 @@ export const authAPI = {
   register: (userData: RegisterData) => api.post('/auth/register/', userData),
   // Fixed: Added trailing slash to login endpoint
   login: (credentials: LoginCredentials) => api.post('/auth/login/', credentials),
+  googleLogin: (credential: string) => api.post('/auth/google/', { credential }),
   // Added trailing slash to getProfile for consistency
   getProfile: () => api.get('/auth/me/'),
+  updateProfile: (data: { username?: string; first_name?: string; last_name?: string; profile_image?: string }) =>
+    api.patch('/auth/me/', data),
 };
 
 // Products endpoints
 export const productsAPI = {
-  getAll: (params?: any) => api.get('/products/', { params }),
+  getAll: (params?: Record<string, string | number | boolean | undefined>) =>
+    api.get('/products/', { params }),
   getById: (id: number) => api.get(`/products/${id}/`),
   create: (productData: ProductData) => api.post('/products/', productData),
   update: (id: number, productData: Partial<ProductData>) => api.put(`/products/${id}/`, productData),
@@ -80,5 +84,11 @@ export const ordersAPI = {
   getOrders: () => api.get('/orders/'),
   getOrderById: (id: number) => api.get(`/orders/${id}/`),
 };
+
+// Banners endpoints
+export const bannersAPI = {
+  getAll: () => api.get('/banners/'),
+};
+
 
 export default api;

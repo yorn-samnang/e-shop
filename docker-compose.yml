@@ -6,11 +6,13 @@ services:
       context: Ecommerce
       dockerfile: dockerfile
     env_file: Ecommerce/.env
+    environment:
+      PORT: ${ECOMMERCE_PORT:-3001}
     depends_on:
       - db
       - backend
     ports:
-      - "3001:3001"
+      - "${ECOMMERCE_PORT:-3001}:3001"
     develop:
       watch:
         - action: sync
@@ -29,11 +31,14 @@ services:
       context: AdminDashboard
       dockerfile: dockerfile
     env_file: AdminDashboard/.env
+    environment:
+      PORT: ${ADMIN_PORT:-3000}
+      BACKEND_INTERNAL_URL: http://backend:8000
     depends_on:
       - db
       - backend
     ports:
-      - "3000:3000"
+      - "${ADMIN_PORT:-3000}:3000"
     develop:
       watch:
         - action: sync
@@ -49,11 +54,13 @@ services:
       context: Ecommerce
       dockerfile: dockerfile.dev
     env_file: Ecommerce/.env
+    environment:
+      PORT: ${ECOMMERCE_PORT:-3001}
     depends_on:
       - db
       - backend
     ports:
-      - "3001:3001"
+      - "${ECOMMERCE_PORT:-3001}:3001"
     develop:
       watch:
         - action: sync
@@ -72,11 +79,14 @@ services:
       context: AdminDashboard
       dockerfile: dockerfile.dev
     env_file: AdminDashboard/.env
+    environment:
+      PORT: ${ADMIN_PORT:-3000}
+      BACKEND_INTERNAL_URL: http://backend:8000
     depends_on:
       - db
       - backend
     ports:
-      - "3000:3000"
+      - "${ADMIN_PORT:-3000}:3000"
     develop:
       watch:
         - action: sync

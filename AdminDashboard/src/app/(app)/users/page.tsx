@@ -1,201 +1,190 @@
 "use client";
+
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
 import { StatusPill } from "@/components/common/StatusPill";
-import { PlusIcon, SearchIcon, FilterIcon, UserIcon, EditIcon, TrashIcon, MoreHorizontalIcon } from "lucide-react";
+import { fetchUsers } from "@/utils/quries";
+import { useQuery } from "@tanstack/react-query";
+import { SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-// Sample data for demo purposes
-const mockUsers = [{
-  id: '1',
-  username: 'johndoe',
-  email: 'john@example.com',
-  registrationDate: '2023-01-15',
-  status: 'active' as const,
-  role: 'Admin'
-}, {
-  id: '2',
-  username: 'janesmith',
-  email: 'jane@example.com',
-  registrationDate: '2023-02-20',
-  status: 'active' as const,
-  role: 'Customer'
-}, {
-  id: '3',
-  username: 'bobwilson',
-  email: 'bob@example.com',
-  registrationDate: '2023-03-10',
-  status: 'inactive' as const,
-  role: 'Customer'
-}, {
-  id: '4',
-  username: 'alicebrown',
-  email: 'alice@example.com',
-  registrationDate: '2023-04-05',
-  status: 'active' as const,
-  role: 'Admin'
-}, {
-  id: '5',
-  username: 'charliejones',
-  email: 'charlie@example.com',
-  registrationDate: '2023-05-12',
-  status: 'inactive' as const,
-  role: 'Customer'
-}, {
-  id: '6',
-  username: 'davemiller',
-  email: 'dave@example.com',
-  registrationDate: '2023-06-18',
-  status: 'active' as const,
-  role: 'Customer'
-}, {
-  id: '7',
-  username: 'evagarcia',
-  email: 'eva@example.com',
-  registrationDate: '2023-07-22',
-  status: 'active' as const,
-  role: 'Customer'
-}, {
-  id: '8',
-  username: 'franklopez',
-  email: 'frank@example.com',
-  registrationDate: '2023-08-30',
-  status: 'inactive' as const,
-  role: 'Customer'
-}];
+export type User = {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_active: boolean;
+  is_staff: boolean;
+  date_joined: string;
+};
 
-export default function UsersPage  ()  {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedRows(mockUsers.map(user => user.id));
-    } else {
-      setSelectedRows([]);
-    }
-  };
-  const handleSelectRow = (id: string) => {
-    if (selectedRows.includes(id)) {
-      setSelectedRows(selectedRows.filter(rowId => rowId !== id));
-    } else {
-      setSelectedRows([...selectedRows, id]);
-    }
-  };
-  const filteredUsers = mockUsers.filter(user => user.username.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase()));
-  return <div className="space-y-6">
+const PAGE_SIZE = 20;
+
+export default function UsersPage() {
+  const { data, isPending } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+  });
+
+  const users: User[] = Array.isArray(data) ? data : data?.results ?? [];
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+
+  const filtered = users.filter(
+    (user) =>
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  return (
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">User Management</h1>
-        <Button icon={<PlusIcon size={16} />}>Add New User</Button>
+        <h1 className="font-bold text-2xl">Users</h1>
       </div>
+
       <Card>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        {/* Search */}
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
           <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <SearchIcon size={18} className="text-gray-400" />
             </div>
-            <input type="text" placeholder="Search users..." className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-          </div>
-          <div className="flex space-x-3">
-            <Button variant="outline" icon={<FilterIcon size={16} />}>
-              Filter
-            </Button>
-            {selectedRows.length > 0 && <Button variant="danger">Delete Selected</Button>}
+            <input
+              type="text"
+              placeholder="Search by username or email..."
+              className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-10 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
+            />
           </div>
         </div>
+
+        {/* Table */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <input type="checkbox" className="h-4 w-4 text-[#1E40AF] focus:ring-[#1E40AF] border-gray-300 rounded" onChange={handleSelectAll} checked={selectedRows.length === mockUsers.length && mockUsers.length > 0} />
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
+                  ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
+                  Username
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Registration Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
+                  Joined
+                </th>
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map(user => <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <input type="checkbox" className="h-4 w-4 text-[#1E40AF] focus:ring-[#1E40AF] border-gray-300 rounded" checked={selectedRows.includes(user.id)} onChange={() => handleSelectRow(user.id)} />
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {isPending ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-6 py-8 text-center text-gray-500 text-sm"
+                  >
+                    Loading users…
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-[#1E293B] flex items-center justify-center text-white">
-                        <UserIcon size={16} />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {user.username}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          ID: {user.id}
-                        </div>
-                      </div>
-                    </div>
+                </tr>
+              ) : paginated.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-6 py-8 text-center text-gray-500 text-sm"
+                  >
+                    No users found.
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.registrationDate}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusPill status={user.status} />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.role}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex space-x-2">
-                      <Link href={`/users/${user.id}`} className="text-[#1E40AF] hover:text-[#1e3a8a]">
-                        <EditIcon size={16} />
+                </tr>
+              ) : (
+                paginated.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="whitespace-nowrap px-6 py-4 text-gray-500 text-sm">
+                      {user.id}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 text-sm">
+                      {user.username}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-gray-500 text-sm">
+                      {user.email}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <StatusPill
+                        status={user.is_active ? "active" : "inactive"}
+                      />
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-gray-500 text-sm">
+                      {user.is_staff ? "Admin" : "Customer"}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-gray-500 text-sm">
+                      {new Date(user.date_joined).toLocaleDateString()}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm">
+                      <Link href={`/users/${user.id}`}>
+                        <Button size="sm" variant="outline">
+                          View
+                        </Button>
                       </Link>
-                      <button className="text-[#DC2626] hover:text-[#b91c1c]">
-                        <TrashIcon size={16} />
-                      </button>
-                      <div className="relative">
-                        <button className="text-gray-500 hover:text-gray-700">
-                          <MoreHorizontalIcon size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>)}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-        <div className="flex items-center justify-between mt-6">
-          <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">1</span> to{' '}
-            <span className="font-medium">{filteredUsers.length}</span> of{' '}
-            <span className="font-medium">{mockUsers.length}</span> users
+
+        {/* Pagination */}
+        <div className="mt-6 flex items-center justify-between">
+          <div className="text-gray-700 text-sm">
+            Showing{" "}
+            <span className="font-medium">
+              {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}
+            </span>{" "}
+            to{" "}
+            <span className="font-medium">
+              {Math.min(page * PAGE_SIZE, filtered.length)}
+            </span>{" "}
+            of <span className="font-medium">{filtered.length}</span> users
           </div>
           <div className="flex space-x-2">
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50" disabled>
+            <button
+              type="button"
+              className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50 disabled:opacity-50"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
               Previous
             </button>
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
+            <button
+              type="button"
+              className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50 disabled:opacity-50"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
               Next
             </button>
           </div>
         </div>
       </Card>
-    </div>;
-};
+    </div>
+  );
+}

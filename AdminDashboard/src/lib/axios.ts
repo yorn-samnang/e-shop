@@ -6,7 +6,8 @@ export const api = axios.create({
   headers: {
     Accept: "application/json",
   },
-  timeout: 1000,
+  // Render's free service can take close to a minute to wake from sleep.
+  timeout: 75_000,
 });
 
 api.interceptors.request.use((config) => {

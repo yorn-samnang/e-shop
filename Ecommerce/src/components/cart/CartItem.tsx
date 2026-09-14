@@ -34,8 +34,8 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
   };
 
   // Correctly format the image URL
-  const getImageUrl = (path) => {
-    if (!path) return null;
+  const getImageUrl = (path: string): string => {
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
     const baseUrl = IMAGE_URL.endsWith('/') ? IMAGE_URL.slice(0, -1) : IMAGE_URL;
     const imagePath = path.startsWith('/') ? path : '/' + path;
     return baseUrl + imagePath;

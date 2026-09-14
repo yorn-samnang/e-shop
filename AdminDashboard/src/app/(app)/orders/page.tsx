@@ -1,219 +1,217 @@
-'use client';
+"use client";
 
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
 import { StatusPill } from "@/components/common/StatusPill";
-import { api } from "@/lib/axios";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { DownloadIcon, SearchIcon, FilterIcon, EyeIcon } from "lucide-react";
+import { fetchOrders } from "@/utils/quries";
+import { useQuery } from "@tanstack/react-query";
+import { SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-// Sample data for demo purposes
-const mockOrders = [{
-  id: '1001',
-  date: '2023-06-01 14:30',
-  customer: 'John Doe',
-  total: '$125.00',
-  payment: 'Paid',
-  status: 'delivered' as const
-}, {
-  id: '1002',
-  date: '2023-06-02 09:15',
-  customer: 'Jane Smith',
-  total: '$85.50',
-  payment: 'Paid',
-  status: 'processing' as const
-}, {
-  id: '1003',
-  date: '2023-06-03 16:45',
-  customer: 'Bob Johnson',
-  total: '$220.75',
-  payment: 'Pending',
-  status: 'shipped' as const
-}, {
-  id: '1004',
-  date: '2023-06-04 11:20',
-  customer: 'Alice Brown',
-  total: '$45.99',
-  payment: 'Paid',
-  status: 'pending' as const
-}, {
-  id: '1005',
-  date: '2023-06-05 13:10',
-  customer: 'Charlie Wilson',
-  total: '$310.25',
-  payment: 'Failed',
-  status: 'cancelled' as const
-}, {
-  id: '1006',
-  date: '2023-06-06 10:30',
-  customer: 'Eva Martinez',
-  total: '$78.50',
-  payment: 'Paid',
-  status: 'delivered' as const
-}, {
-  id: '1007',
-  date: '2023-06-07 15:45',
-  customer: 'David Lee',
-  total: '$156.75',
-  payment: 'Paid',
-  status: 'shipped' as const
-}, {
-  id: '1008',
-  date: '2023-06-08 12:20',
-  customer: 'Sophia Wang',
-  total: '$92.25',
-  payment: 'Pending',
-  status: 'processing' as const
-}];
-
-export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-
-export interface Order {
-  id: number;
-  user: number;
-  status: OrderStatus;
-  address: string;
-  total: number;
+export type Order = {
+  order_id: number;
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  total: string;
   created_at: string;
-  updated_at: string;
-}
+  address: string;
+  items?: OrderItem[];
+  user_email?: string;
+};
 
-export interface OrderItem {
-  id: number;
-  order: number;
-  product: number;
+export type OrderItem = {
+  product_id: number;
   name: string;
-  price: number;
   quantity: number;
-  subtotal: number;
-}
+  price: string;
+};
 
-export default function OrdersPage(){
+type StatusFilter =
+  | "all"
+  | "pending"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
 
-  const {data} = useQuery({
-    queryKey: ['orders'],
-    queryFn: async () => {
-      const res = await api.get('/api/orders/')
-      console.log(res.data)
-      return res.data
-    }
-  })
+const PAGE_SIZE = 20;
 
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const filteredOrders = mockOrders.filter(order => {
-    const matchesSearch = order.id.includes(searchTerm) || order.customer.toLowerCase().includes(searchTerm.toLowerCase());
-    if (statusFilter) {
-      return matchesSearch && order.status === statusFilter;
-    }
-    return matchesSearch;
+export default function OrdersPage() {
+  const { data, isPending } = useQuery({
+    queryKey: ["orders"],
+    queryFn: fetchOrders,
   });
-  const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-  return <div className="space-y-6">
+
+  const orders: Order[] = Array.isArray(data) ? data : data?.results ?? [];
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [page, setPage] = useState(1);
+
+  const filtered = orders.filter((order) => {
+    const matchesSearch =
+      String(order.order_id).includes(searchTerm) ||
+      (order.user_email ?? "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || order.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  return (
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Order Management</h1>
-        <Button icon={<DownloadIcon size={16} />} variant="outline">
-          Export Orders
-        </Button>
+        <h1 className="font-bold text-2xl">Orders</h1>
       </div>
-      <div className="flex flex-wrap gap-2 mb-4">
-        <button onClick={() => setStatusFilter(null)} className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === null ? 'bg-[#1E40AF] text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
-          All
-        </button>
-        {statusOptions.map(status => <button key={status} onClick={() => setStatusFilter(status)} className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === status ? 'bg-[#1E40AF] text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </button>)}
-      </div>
+
       <Card>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        {/* Filters */}
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <SearchIcon size={18} className="text-gray-400" />
             </div>
-            <input type="text" placeholder="Search by order ID or customer..." className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            <input
+              type="text"
+              placeholder="Search by order ID or user email..."
+              className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-10 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
+            />
           </div>
           <div>
-            <Button variant="outline" icon={<FilterIcon size={16} />}>
-              More Filters
-            </Button>
+            <select
+              className="rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as StatusFilter);
+                setPage(1);
+              }}
+            >
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
           </div>
         </div>
+
+        {/* Table */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                   Order ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
+                  User Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                   Total
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Payment
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredOrders.map(order => <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    #{order.id}
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {isPending ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="px-6 py-8 text-center text-gray-500 text-sm"
+                  >
+                    Loading orders…
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {order.date}
+                </tr>
+              ) : paginated.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="px-6 py-8 text-center text-gray-500 text-sm"
+                  >
+                    No orders found.
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {order.customer}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {order.total}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.payment === 'Paid' ? 'bg-green-100 text-green-800' : order.payment === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
-                      {order.payment}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusPill status={order.status} />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <Link href={`/orders/${order.id}`} className="text-[#1E40AF] hover:text-[#1e3a8a] flex items-center">
-                      <EyeIcon size={16} className="mr-1" /> View
-                    </Link>
-                  </td>
-                </tr>)}
+                </tr>
+              ) : (
+                paginated.map((order) => (
+                  <tr key={order.order_id} className="hover:bg-gray-50">
+                    <td className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 text-sm">
+                      #{order.order_id}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-gray-500 text-sm">
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-gray-500 text-sm">
+                      {order.user_email ?? "—"}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 font-medium text-sm">
+                      ${order.total}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <StatusPill status={order.status} />
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm">
+                      <Link href={`/orders/${order.order_id}`}>
+                        <Button size="sm" variant="outline">
+                          View
+                        </Button>
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-        <div className="flex items-center justify-between mt-6">
-          <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">1</span> to{' '}
-            <span className="font-medium">{filteredOrders.length}</span> of{' '}
-            <span className="font-medium">{mockOrders.length}</span> orders
+
+        {/* Pagination */}
+        <div className="mt-6 flex items-center justify-between">
+          <div className="text-gray-700 text-sm">
+            Showing{" "}
+            <span className="font-medium">
+              {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}
+            </span>{" "}
+            to{" "}
+            <span className="font-medium">
+              {Math.min(page * PAGE_SIZE, filtered.length)}
+            </span>{" "}
+            of <span className="font-medium">{filtered.length}</span> orders
           </div>
           <div className="flex space-x-2">
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50" disabled>
+            <button
+              type="button"
+              className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50 disabled:opacity-50"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
               Previous
             </button>
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
+            <button
+              type="button"
+              className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50 disabled:opacity-50"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
               Next
             </button>
           </div>
         </div>
       </Card>
-    </div>;
-};
+    </div>
+  );
+}

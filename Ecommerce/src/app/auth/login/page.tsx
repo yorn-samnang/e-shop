@@ -1,79 +1,47 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { LoginCredentials } from '@/lib/types';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import PasswordInput from '@/components/ui/PasswordInput';
 import Card from '@/components/ui/Card';
-import { FcGoogle } from 'react-icons/fc';
+import { getApiErrorMessage } from '@/lib/apiErrors';
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 export default function LoginPage() {
-  const { login, signInWithGoogle } = useAuth();
+  const { login } = useAuth();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginCredentials>();
+
+  useEffect(() => {
+    const savedEmail = window.sessionStorage.getItem('login-email');
+    if (savedEmail) {
+      setValue('email', savedEmail, { shouldValidate: true });
+      window.sessionStorage.removeItem('login-email');
+    }
+  }, [setValue]);
 
   const onSubmit = async (data: LoginCredentials) => {
     setIsLoading(true);
     setError('');
 
     try {
-      // Log the data being sent to help with debugging
-      console.log('Login attempt with:', data);
-      
-      // Call the login function from useAuth
-      const result = await login(data);
-      console.log('Login result:', result);
-      
-      // If login is successful but doesn't redirect, you might need to handle that here
-      // For example: router.push('/dashboard');
-    } catch (err: any) {
-      console.error('Login error:', err);
-      // Specific handling for 500 server errors
-      if (err.response?.status === 500) {
-        setError('Server error occurred. Please try again later or contact support.');
-        console.error('Server error details:', err.response?.data);
-      } 
-      // More detailed error handling for other cases
-      else if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.message) {
-        setError(err.message);
-      } else {
-        setError('Invalid email or password. Please try again.');
-      }
+      await login({ ...data, email: data.email.trim().toLowerCase() });
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Unable to log in. Please try again.'));
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    setError('');
-    
-    try {
-      const result = await signInWithGoogle();
-      console.log('Google sign-in result:', result);
-    } catch (err: any) {
-      console.error('Google sign-in error:', err);
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.message) {
-        setError(err.message);
-      } else {
-        setError('Google sign-in failed. Please try again.');
-      }
-    } finally {
-      setGoogleLoading(false);
     }
   };
 
@@ -96,6 +64,7 @@ export default function LoginPage() {
             <Input
               label="Email"
               type="email"
+              autoComplete="email"
               fullWidth
               error={errors.email?.message}
               {...register('email', {
@@ -107,22 +76,22 @@ export default function LoginPage() {
               })}
             />
 
-            <Input
+            <PasswordInput
               label="Password"
-              type="password"
+              autoComplete="current-password"
               fullWidth
               error={errors.password?.message}
               {...register('password', {
                 required: 'Password is required',
                 minLength: {
-                  value: 6,
-                  message: 'Password must be at least 6 characters',
+                  value: 8,
+                  message: 'Password must be at least 8 characters',
                 },
               })}
             />
 
             <div className="text-right">
-              <Link href="/auth/forgot-password" className="text-sm text-primary-600 hover:text-primary-800 transition-colors">
+              <Link href="/auth/forgot-password" className="text-sm text-primary transition-colors hover:text-primary-dark">
                 Forgot password?
               </Link>
             </div>
@@ -147,21 +116,11 @@ export default function LoginPage() {
             </div>
           </div>
           
-          <Button 
-            onClick={handleGoogleSignIn} 
-            isLoading={googleLoading}
-            fullWidth 
-            variant="outline" 
-            size="lg" 
-            className="flex items-center justify-center gap-2"
-          >
-            <FcGoogle className="text-xl" />
-            <span>Continue with Google</span>
-          </Button>
+          <GoogleSignInButton intent="signin" onError={setError} />
 
           <div className="mt-8 text-center text-sm text-gray-600">
             Don&apos;t have an account?{' '}
-            <Link href="/auth/register" className="text-primary-600 hover:text-primary-800 font-medium transition-colors">
+            <Link href="/auth/register" className="font-medium text-primary transition-colors hover:text-primary-dark">
               Register
             </Link>
           </div>
@@ -170,5 +129,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-

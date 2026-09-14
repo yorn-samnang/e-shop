@@ -5,16 +5,16 @@ from .models import Product
 class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'name', 'price', 'image_url', 'in_stock']
+        fields = ['id', 'name', 'price', 'image_url', 'in_stock', 'category']
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'name', 'description', 'price', 'image_url', 'in_stock']
+        fields = ['id', 'name', 'description', 'price', 'image_url', 'in_stock', 'category']
 
 
 class ProductCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['name', 'description', 'price', 'image_url', 'in_stock']
+        fields = ['name', 'description', 'price', 'image_url', 'in_stock', 'category']

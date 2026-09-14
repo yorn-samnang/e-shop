@@ -1,99 +1,68 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
-import { FiInstagram, FiTwitter, FiFacebook } from 'react-icons/fi';
+import { FiFacebook, FiInstagram, FiTwitter } from 'react-icons/fi';
+import { useAuth } from '@/hooks/useAuth';
 
-const Footer: React.FC = () => {
+export default function Footer() {
   const currentYear = new Date().getFullYear();
-  
+  const { isAuthenticated } = useAuth();
+  const linkClass = 'text-sm text-text-secondary transition-colors hover:text-primary dark:hover:text-primary-light';
+  const socialClass = 'rounded-lg border border-divider p-2 text-text-secondary transition-colors hover:border-primary hover:text-primary';
+
   return (
-    <footer className="bg-gray-100">
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-2">
-            <h2 className="text-lg font-bold text-primary-600 mb-4">E-Shop</h2>
-            <p className="text-gray-600 mb-4">
+    <footer className="border-t border-divider bg-white text-text-primary dark:bg-slate-900">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="grid gap-9 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="sm:col-span-2">
+            <Link href="/" className="inline-flex items-center" aria-label="E-Shop home">
+              <img src="/logo.png" alt="" className="h-12 w-auto" />
+            </Link>
+            <p className="mt-4 max-w-md text-sm leading-6 text-text-secondary">
               Your one-stop shop for quality products at affordable prices.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-gray-500">
-                <FiTwitter className="h-6 w-6" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-gray-500">
-                <FiFacebook className="h-6 w-6" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-gray-500">
-                <FiInstagram className="h-6 w-6" />
-              </a>
+            <div className="mt-5 flex gap-2">
+              <a href="#" aria-label="Twitter" className={socialClass}><FiTwitter className="h-5 w-5" /></a>
+              <a href="#" aria-label="Facebook" className={socialClass}><FiFacebook className="h-5 w-5" /></a>
+              <a href="#" aria-label="Instagram" className={socialClass}><FiInstagram className="h-5 w-5" /></a>
             </div>
           </div>
-          
+
           <div>
-            <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">
-              Shop
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/products" className="text-gray-600 hover:text-gray-900">
-                  All Products
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=electronics" className="text-gray-600 hover:text-gray-900">
-                  Electronics
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=clothing" className="text-gray-600 hover:text-gray-900">
-                  Clothing
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=accessories" className="text-gray-600 hover:text-gray-900">
-                  Accessories
-                </Link>
-              </li>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-text-secondary">Shop</h3>
+            <ul className="space-y-3">
+              <li><Link href="/products" className={linkClass}>All products</Link></li>
+              <li><Link href="/products?category=electronics" className={linkClass}>Electronics</Link></li>
+              <li><Link href="/products?category=clothing" className={linkClass}>Clothing</Link></li>
+              <li><Link href="/products?category=home" className={linkClass}>Home &amp; Kitchen</Link></li>
             </ul>
           </div>
-          
+
           <div>
-            <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">
-              Company
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/about" className="text-gray-600 hover:text-gray-900">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-gray-600 hover:text-gray-900">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-gray-600 hover:text-gray-900">
-                  Terms
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="text-gray-600 hover:text-gray-900">
-                  Privacy
-                </Link>
-              </li>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-text-secondary">Account</h3>
+            <ul className="space-y-3">
+              <li><Link href="/cart" className={linkClass}>Shopping cart</Link></li>
+              {isAuthenticated ? (
+                <>
+                  <li><Link href="/orders" className={linkClass}>My orders</Link></li>
+                  <li><Link href="/profile" className={linkClass}>My profile</Link></li>
+                </>
+              ) : (
+                <>
+                  <li><Link href="/auth/login" className={linkClass}>Sign in</Link></li>
+                  <li><Link href="/auth/register" className={linkClass}>Create account</Link></li>
+                </>
+              )}
             </ul>
           </div>
         </div>
-        
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <p className="text-gray-400 text-sm text-center">
+
+        <div className="mt-9 border-t border-divider pt-6">
+          <p className="text-center text-sm text-text-secondary sm:text-left">
             &copy; {currentYear} E-Shop. All rights reserved.
           </p>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

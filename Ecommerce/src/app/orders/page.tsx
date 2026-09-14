@@ -6,12 +6,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FiPackage, FiShoppingBag, FiArrowLeft } from 'react-icons/fi';
 import { ordersAPI } from '@/lib/api';
-import { Order, OrderSummary } from '@/lib/types';
+import { OrderSummary } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/ui/Button';
 
 export default function OrdersHistoryPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -91,7 +91,7 @@ export default function OrdersHistoryPage() {
       <div className="text-center py-12 max-w-4xl mx-auto">
         <FiPackage className="mx-auto h-12 w-12 text-gray-400 mb-4" />
         <h2 className="text-2xl font-bold mb-2">No orders yet</h2>
-        <p className="text-gray-600 mb-6">You haven't placed any orders yet.</p>
+        <p className="text-gray-600 mb-6">You haven&apos;t placed any orders yet.</p>
         <Link href="/products">
           <Button>
             <FiShoppingBag className="mr-2" />
@@ -136,7 +136,7 @@ export default function OrdersHistoryPage() {
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                       {order.status}
                     </span>
-                    <span className="ml-4 font-medium">${order.total?.toFixed(2) || '0.00'}</span>
+                    <span className="ml-4 font-medium">${parseFloat(String(order.total || 0)).toFixed(2)}</span>
                   </div>
                 </div>
                 
@@ -153,4 +153,3 @@ export default function OrdersHistoryPage() {
     </div>
   );
 }
-

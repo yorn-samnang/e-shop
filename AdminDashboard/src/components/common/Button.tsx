@@ -22,9 +22,9 @@ export const Button: React.FC<ButtonProps> = ({
   const getVariantClasses = () => {
     switch (variant) {
       case 'primary':
-        return 'bg-[#1E40AF] hover:bg-[#1e3a8a] text-white';
+        return 'bg-primary hover:bg-primary-dark text-white';
       case 'secondary':
-        return 'bg-[#0EA5E9] hover:bg-[#0284c7] text-white';
+        return 'bg-primary-light hover:bg-primary text-white';
       case 'success':
         return 'bg-[#10B981] hover:bg-[#059669] text-white';
       case 'danger':
@@ -34,7 +34,7 @@ export const Button: React.FC<ButtonProps> = ({
       case 'outline':
         return 'bg-white border border-gray-300 hover:bg-gray-50 text-gray-700';
       default:
-        return 'bg-[#1E40AF] hover:bg-[#1e3a8a] text-white';
+        return 'bg-primary hover:bg-primary-dark text-white';
     }
   };
   const getSizeClasses = () => {
@@ -53,7 +53,7 @@ export const Button: React.FC<ButtonProps> = ({
         ${getVariantClasses()}
         ${getSizeClasses()}
         ${fullWidth ? 'w-full' : ''}
-        rounded-md font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1E40AF]
+        rounded-md font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
         flex items-center justify-center transition-colors
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
       `} onClick={onClick} disabled={disabled}>

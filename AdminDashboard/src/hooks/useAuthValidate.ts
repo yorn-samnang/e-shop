@@ -8,7 +8,7 @@ export const useAuthValidate = () => {
 
   const { data, isPending } = useQuery({
     queryKey: ["me"],
-    queryFn: async () => (await api.get("api/auth/me/")).data(),
+    queryFn: async () => (await api.get("/api/auth/me/")).data,
   });
 
   if (!data && !isPending) {

@@ -13,7 +13,7 @@ interface ProductListProps {
 const ProductList: React.FC<ProductListProps> = ({ products, isLoading = false }) => {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="animate-pulse">
             <div className="bg-gray-200 h-60 rounded-lg mb-4"></div>
@@ -39,7 +39,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, isLoading = false }
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
       {productArray.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}

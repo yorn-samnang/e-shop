@@ -24,12 +24,20 @@ import type { Product } from "../page";
 type Props = {
   params: Promise<{ id: string }>;
 };
+const CATEGORIES = [
+  { value: 'electronics', label: 'Electronics' },
+  { value: 'clothing', label: 'Clothing' },
+  { value: 'accessories', label: 'Accessories' },
+  { value: 'home', label: 'Home & Kitchen' },
+] as const;
+
 const schema = z.object({
   name: z.string().optional(),
   price: z.string().optional(),
   description: z.string().optional(),
   in_stock: z.string().optional(),
   image_url: z.string().optional(),
+  category: z.string().optional(),
 });
 
 type Schema = z.infer<typeof schema>;
@@ -40,10 +48,6 @@ export default function ProductDetailPage({ params }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { control, register, handleSubmit } = useForm<Schema>({
-    resolver: zodResolver(schema),
-  });
-
   const { data, isPending } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
@@ -53,13 +57,28 @@ export default function ProductDetailPage({ params }: Props) {
     },
   });
 
+  const { register, handleSubmit } = useForm<Schema>({
+    resolver: zodResolver(schema),
+    values: data
+      ? {
+          name: data.name ?? "",
+          description: data.description ?? "",
+          price: String(data.price ?? ""),
+          in_stock: String(data.in_stock ?? ""),
+          image_url: data.image_url ?? "",
+          category: data.category ?? "",
+        }
+      : undefined,
+  });
+
   const updateProductMutation = useMutation({
     mutationFn: async (product: Schema) => {
       const res = await api.patch(`api/products/${id}/`, product);
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["product", product.id] });
+      queryClient.invalidateQueries({ queryKey: ["product", id] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Product updated successfully");
     },
   });
@@ -143,7 +162,7 @@ export default function ProductDetailPage({ params }: Props) {
                     type="button"
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center rounded-md px-4 py-2 font-medium text-sm ${activeTab === tab.id ? "bg-[#1E40AF] text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"}`}
+                    className={`flex items-center rounded-md px-4 py-2 font-medium text-sm ${activeTab === tab.id ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"}`}
                   >
                     <span className="mr-2">{tab.icon}</span>
                     {tab.label}
@@ -165,8 +184,7 @@ export default function ProductDetailPage({ params }: Props) {
                     name="name"
                     id="name"
                     type="text"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
-                    defaultValue={product.name}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -180,10 +198,29 @@ export default function ProductDetailPage({ params }: Props) {
                     {...register("description")}
                     name="description"
                     id="description"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
                     rows={6}
-                    defaultValue={product.description}
                   />
+                </div>
+                <div>
+                  <label
+                    htmlFor="category"
+                    className="mb-1 block font-medium text-gray-700 text-sm"
+                  >
+                    Category
+                  </label>
+                  <select
+                    {...register("category")}
+                    id="category"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">No category</option>
+                    {CATEGORIES.map((category) => (
+                      <option key={category.value} value={category.value}>
+                        {category.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             )}
@@ -203,8 +240,7 @@ export default function ProductDetailPage({ params }: Props) {
                       id="price"
                       type="number"
                       step="0.01"
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
-                      defaultValue={product.price}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -225,8 +261,7 @@ export default function ProductDetailPage({ params }: Props) {
                       name="in_stock"
                       id="in_stock"
                       type="number"
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
-                      defaultValue={product.in_stock}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -247,7 +282,7 @@ export default function ProductDetailPage({ params }: Props) {
               />
               <h4 className="font-medium">{product.name}</h4>
               <div className="mt-1 flex items-center space-x-2">
-                <span className="font-medium text-[#1E40AF]">
+                <span className="font-medium text-primary">
                   ${product.price}
                 </span>
               </div>

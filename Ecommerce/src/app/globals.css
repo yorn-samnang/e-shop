@@ -3,23 +3,39 @@
 @tailwind components;
 @tailwind utilities;
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Brand color tokens ────────────────────────────────────── */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Logo orange */
+  --color-primary:       #C2410C;
+  --color-primary-dark:  #9A3412;
+  --color-primary-light: #FB923C;
+
+  /* Aliases used throughout the app */
+  --color-text-primary:   #1a1a1a;
+  --color-text-secondary: #6b7280;
+  --color-bg-secondary:   #FFF7ED;
+  --color-divider:        #e5e7eb;
 }
 
+/* Expose tokens as Tailwind theme values */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary:        var(--color-primary);
+  --color-primary-dark:   var(--color-primary-dark);
+  --color-primary-light:  var(--color-primary-light);
+  --color-text-primary:   var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-bg-secondary:   var(--color-bg-secondary);
+  --color-divider:        var(--color-divider);
 }
 
 body {
@@ -28,16 +44,55 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-
-
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
+.dark {
+  --background: #0f172a;
+  --foreground: #e2e8f0;
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-bg-secondary: #431407;
+  --color-divider: #334155;
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+/* Dark-mode compatibility for existing storefront components. */
+.dark .bg-white { background-color: #111827; }
+.dark .bg-slate-50,
+.dark .bg-gray-50 { background-color: #1e293b; }
+.dark .bg-slate-100,
+.dark .bg-gray-100 { background-color: #334155; }
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-gray-50:hover { background-color: #334155; }
+.dark .hover\:bg-gray-100:hover { background-color: #475569; }
+.dark .text-slate-950,
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 { color: #e5e7eb; }
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-gray-600,
+.dark .text-gray-500 { color: #94a3b8; }
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300,
+.dark .border-divider { border-color: #334155; }
+.dark .divide-gray-200 > :not(:last-child),
+.dark .divide-slate-200 > :not(:last-child) { border-color: #334155; }
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1e293b;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: #64748b; }
+
+.dark [class~="bg-white/90"] {
+  background-color: rgb(15 23 42 / 0.9);
 }
 
 /* Fix input focus appearance in Safari */
@@ -53,4 +108,11 @@ button {
 /* Add smooth scrolling */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }

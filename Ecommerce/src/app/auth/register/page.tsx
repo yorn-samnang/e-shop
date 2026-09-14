@@ -7,14 +7,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { RegisterData } from '@/lib/types';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import PasswordInput from '@/components/ui/PasswordInput';
 import Card from '@/components/ui/Card';
-import { FcGoogle } from 'react-icons/fc'; // Make sure to install react-icons
+import { getApiErrorMessage } from '@/lib/apiErrors';
+import { Check } from 'lucide-react';
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 export default function RegisterPage() {
-  const { register: registerUser, signInWithGoogle } = useAuth();
+  const { register: registerUser } = useAuth();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [showLoginLink, setShowLoginLink] = useState(false);
 
   const {
     register,
@@ -26,35 +29,33 @@ export default function RegisterPage() {
   const password = watch('password', '');
 
   const onSubmit = async (data: RegisterData & { confirmPassword: string; termsAccepted: boolean }) => {
-    const { confirmPassword, termsAccepted, ...registerData } = data;
-
-    if (!termsAccepted) {
+    if (!data.termsAccepted) {
       setError('You must accept the Terms of Service and Privacy Policy to register.');
       return;
     }
 
+    const registerData: RegisterData = {
+      username: data.username.trim(),
+      email: data.email.trim().toLowerCase(),
+      password: data.password,
+    };
+
     setIsLoading(true);
     setError('');
+    setShowLoginLink(false);
 
     try {
       await registerUser(registerData);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } catch (err: unknown) {
+      const message = getApiErrorMessage(err, 'Registration failed. Please try again.');
+      const emailAlreadyExists = message.toLowerCase().includes('email already exists');
+      setError(message);
+      setShowLoginLink(emailAlreadyExists);
+      if (emailAlreadyExists) {
+        window.sessionStorage.setItem('login-email', registerData.email);
+      }
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    setError('');
-    
-    try {
-      await signInWithGoogle();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
-    } finally {
-      setGoogleLoading(false);
     }
   };
 
@@ -68,21 +69,27 @@ export default function RegisterPage() {
 
         <Card variant="elevated" className="p-8">
           {error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg text-sm">
-              {error}
+            <div className="mb-4 rounded-lg bg-red-100 p-3 text-red-700 text-sm" role="alert">
+              <p>{error}</p>
+              {showLoginLink && (
+                <Link href="/auth/login" className="mt-2 inline-block font-semibold text-primary underline underline-offset-2">
+                  Go to login
+                </Link>
+              )}
             </div>
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <Input
               label="Username"
+              autoComplete="username"
               fullWidth
               error={errors.username?.message}
               {...register('username', {
                 required: 'Username is required',
                 minLength: {
                   value: 3,
-                  message: 'Username must be at least.3 characters',
+                  message: 'Username must be at least 3 characters',
                 },
               })}
             />
@@ -90,6 +97,7 @@ export default function RegisterPage() {
             <Input
               label="Email"
               type="email"
+              autoComplete="email"
               fullWidth
               error={errors.email?.message}
               {...register('email', {
@@ -101,23 +109,23 @@ export default function RegisterPage() {
               })}
             />
 
-            <Input
+            <PasswordInput
               label="Password"
-              type="password"
+              autoComplete="new-password"
               fullWidth
               error={errors.password?.message}
               {...register('password', {
                 required: 'Password is required',
                 minLength: {
-                  value: 6,
-                  message: 'Password must be at least 6 characters',
+                  value: 8,
+                  message: 'Password must be at least 8 characters',
                 },
               })}
             />
 
-            <Input
+            <PasswordInput
               label="Confirm Password"
-              type="password"
+              autoComplete="new-password"
               fullWidth
               error={errors.confirmPassword?.message}
               {...register('confirmPassword', {
@@ -127,29 +135,36 @@ export default function RegisterPage() {
             />
 
             <div className="flex items-start">
-              <div className="flex items-center h-5">
+              <div className="relative mt-0.5 flex h-5 w-5 shrink-0">
                 <input
                   type="checkbox"
                   id="termsAccepted"
-                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                  aria-invalid={Boolean(errors.termsAccepted)}
+                  aria-describedby={errors.termsAccepted ? 'termsAccepted-error' : undefined}
+                  className="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-slate-300 bg-white transition-colors hover:border-primary checked:border-primary checked:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:checked:border-primary-light dark:checked:bg-primary"
                   {...register('termsAccepted', {
                     required: 'You must accept the Terms of Service and Privacy Policy',
                   })}
                 />
+                <Check
+                  aria-hidden="true"
+                  strokeWidth={3}
+                  className="pointer-events-none absolute inset-0 m-auto h-3.5 w-3.5 text-white opacity-0 transition-opacity peer-checked:opacity-100"
+                />
               </div>
               <div className="ml-3 text-sm">
-                <label htmlFor="termsAccepted" className="text-gray-600">
+                <label htmlFor="termsAccepted" className="cursor-pointer text-gray-600 dark:text-slate-300">
                   I agree to the{' '}
-                  <Link href="/terms" className="text-primary-600 hover:text-primary-800 font-medium transition-colors">
+                  <Link href="/terms" className="font-medium text-primary transition-colors hover:text-primary-dark">
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link href="/privacy" className="text-primary-600 hover:text-primary-800 font-medium transition-colors">
+                  <Link href="/privacy" className="font-medium text-primary transition-colors hover:text-primary-dark">
                     Privacy Policy
                   </Link>
                 </label>
                 {errors.termsAccepted && (
-                  <p className="mt-1 text-xs text-red-600">{errors.termsAccepted.message}</p>
+                  <p id="termsAccepted-error" className="mt-1 text-xs text-red-600">{errors.termsAccepted.message}</p>
                 )}
               </div>
             </div>
@@ -174,21 +189,17 @@ export default function RegisterPage() {
             </div>
           </div>
           
-          <Button 
-            onClick={handleGoogleSignIn} 
-            isLoading={googleLoading}
-            fullWidth 
-            variant="outline" 
-            size="lg" 
-            className="flex items-center justify-center gap-2"
-          >
-            <FcGoogle className="text-xl" />
-            <span>Continue with Google</span>
-          </Button>
+          <GoogleSignInButton
+            intent="signup"
+            onError={(message) => {
+              setError(message);
+              setShowLoginLink(false);
+            }}
+          />
 
           <div className="mt-8 text-center text-sm text-gray-600">
             Already have an account?{' '}
-            <Link href="/auth/login" className="text-primary-600 hover:text-primary-800 font-medium transition-colors">
+            <Link href="/auth/login" className="font-medium text-primary transition-colors hover:text-primary-dark">
               Login
             </Link>
           </div>

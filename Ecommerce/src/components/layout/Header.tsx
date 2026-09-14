@@ -325,9 +325,10 @@ import { ShoppingCart, User, Menu, Search, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { motion, AnimatePresence } from 'framer-motion'; 
+import ThemeSelector from '@/components/ui/ThemeSelector';
 
 const Header = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const { totalItems } = useCart();
   const pathname = usePathname();
   const router = useRouter();
@@ -336,6 +337,10 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartUpdated, setIsCartUpdated] = useState(false);
   const [prevTotalItems, setPrevTotalItems] = useState(totalItems);
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsCategoryOpen(false);
+  }, [pathname]);
 
   // Sync search state with URL on load
   useEffect(() => {
@@ -367,6 +372,7 @@ const Header = () => {
     if (e) e.preventDefault();
     
     if (searchQuery.trim()) {
+      window.dispatchEvent(new Event('route-navigation-start'));
       // Navigate to products page with search parameter
       router.push(`/products?search=${encodeURIComponent(searchQuery)}`);
       
@@ -422,14 +428,23 @@ const Header = () => {
     }
   };
 
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+
+  const categories = [
+    { label: 'Electronics', value: 'electronics' },
+    { label: 'Clothing', value: 'clothing' },
+    { label: 'Accessories', value: 'accessories' },
+    { label: 'Home & Kitchen', value: 'home' },
+  ];
+
   return (
     <header className="bg-white border-b border-divider sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-primary">E-Shop</span>
+            <Link href="/" className="flex items-center gap-2">
+              <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
             </Link>
           </div>
           
@@ -451,7 +466,53 @@ const Header = () => {
                 >
                   Products
                 </Link>
-                
+
+                {/* Categories Dropdown */}
+                <div
+                  className="relative"
+                  onMouseEnter={() => setIsCategoryOpen(true)}
+                  onMouseLeave={() => setIsCategoryOpen(false)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setIsCategoryOpen((isOpen) => !isOpen)}
+                    aria-haspopup="menu"
+                    aria-expanded={isCategoryOpen}
+                    className={`text-text-primary hover:text-primary px-3 py-2 text-sm font-medium flex items-center gap-1 ${
+                      isCategoryOpen ? 'text-primary' : ''
+                    }`}
+                  >
+                    Categories
+                    <svg className={`w-4 h-4 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <AnimatePresence>
+                    {isCategoryOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute left-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-100 py-1 z-50"
+                        role="menu"
+                      >
+                        {categories.map((cat) => (
+                          <Link
+                            key={cat.value}
+                            href={`/products?category=${cat.value}`}
+                            className="block px-4 py-2 text-sm text-text-primary hover:bg-orange-50 hover:text-primary"
+                            onClick={() => setIsCategoryOpen(false)}
+                            role="menuitem"
+                          >
+                            {cat.label}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
                 <button
                   onClick={toggleSearch}
                   className="text-text-primary hover:text-primary px-3 py-2 text-sm font-medium"
@@ -470,12 +531,14 @@ const Header = () => {
                       variants={cartCountVariants}
                       initial="initial"
                       animate={isCartUpdated ? "updated" : "animate"}
-                      className="absolute top-0 right-0 -translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold min-w-5 h-5 px-1 flex items-center justify-center rounded-full shadow-md select-none leading-none"
+                      className="absolute top-0 right-0 -translate-x-1/2 -translate-y-1/2 bg-primary text-white text-xs font-bold min-w-5 h-5 px-1 flex items-center justify-center rounded-full shadow-md select-none leading-none"
                     >
                       {totalItems > 99 ? '99+' : totalItems}
                     </motion.span>
                   )}
                 </Link>
+
+                <ThemeSelector compact />
                 
                 {isAuthenticated ? (
                   <div className="relative">
@@ -490,7 +553,7 @@ const Header = () => {
                   <div className="flex items-center space-x-2">
                     <Link 
                       href="/auth/login"
-                      className="text-sm font-medium px-4 py-2 rounded border border-primary text-primary hover:bg-primary hover:text-white transition-colors"
+                      className="text-sm font-medium px-4 py-2 rounded-lg border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-white transition-all duration-200"
                     >
                       Sign In
                     </Link>
@@ -617,7 +680,29 @@ const Header = () => {
                 >
                   Products
                 </Link>
-                
+
+                {/* Mobile Categories */}
+                <div className="pt-1 pb-1">
+                  <p className="px-3 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Categories</p>
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat.value}
+                      href={`/products?category=${cat.value}`}
+                      className="block px-3 py-2 rounded-md text-base font-medium text-text-primary hover:text-primary hover:bg-bg-secondary pl-6"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {cat.label}
+                    </Link>
+                  ))}
+                </div>
+
+                <div className="px-3 py-2">
+                  <p className="mb-2 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                    Appearance
+                  </p>
+                  <ThemeSelector />
+                </div>
+
                 {isAuthenticated ? (
                   <>
                     <Link

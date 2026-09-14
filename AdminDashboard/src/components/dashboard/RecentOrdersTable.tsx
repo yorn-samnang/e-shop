@@ -20,7 +20,7 @@ export const RecentOrdersTable: React.FC<RecentOrdersTableProps> = ({
         <h3 className="font-semibold text-lg">Recent Orders</h3>
         <Link
           href="/orders"
-          className="flex items-center text-[#1E40AF] text-sm hover:underline"
+          className="flex items-center text-primary text-sm hover:underline"
         >
           View All <ChevronRightIcon size={16} className="ml-1" />
         </Link>
@@ -70,7 +70,7 @@ export const RecentOrdersTable: React.FC<RecentOrdersTableProps> = ({
                 <td className="whitespace-nowrap px-6 py-4 text-sm">
                   <Link
                     href={`/orders/${order.id}`}
-                    className="text-[#1E40AF] hover:underline"
+                    className="text-primary hover:underline"
                   >
                     View
                   </Link>
@@ -83,4 +83,3 @@ export const RecentOrdersTable: React.FC<RecentOrdersTableProps> = ({
     </div>
   );
 };
-

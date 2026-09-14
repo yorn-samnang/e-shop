@@ -26,6 +26,7 @@ const CartSummary: React.FC = () => {
     try {
       const response = await ordersAPI.createOrder({ address });
       clearCart();
+      window.dispatchEvent(new Event('route-navigation-start'));
       router.push(`/orders/${response.data.order_id}`);
     } catch (error) {
       console.error('Error creating order:', error);

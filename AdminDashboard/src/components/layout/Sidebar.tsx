@@ -1,5 +1,6 @@
 'use client';
-import { LayoutDashboardIcon, UsersIcon, ShoppingBagIcon, ShoppingCartIcon, SettingsIcon, ChevronLeftIcon   } from "lucide-react";
+import { LayoutDashboardIcon, UsersIcon, ShoppingBagIcon, ShoppingCartIcon, SettingsIcon, ChevronLeftIcon, ImageIcon } from "lucide-react";
+
 import Link from "next/link";
 
 import { usePathname } from "next/navigation";
@@ -20,45 +21,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
     path: '/dashboard',
     icon: <LayoutDashboardIcon size={20} />
   },
-  //   {
-  //   name: 'Users',
-  //   path: '/users',
-  //   icon: <UsersIcon size={20} />
-  // },
-    {
+  {
+    name: 'Users',
+    path: '/users',
+    icon: <UsersIcon size={20} />
+  }, {
     name: 'Products',
     path: '/products',
     icon: <ShoppingBagIcon size={20} />
   }, {
+    name: 'Banners',
+    path: '/banners',
+    icon: <ImageIcon size={20} />
+  }, {
     name: 'Orders',
     path: '/orders',
     icon: <ShoppingCartIcon size={20} />
+
   }, {
     name: 'Settings',
     path: '/settings',
     icon: <SettingsIcon size={20} />
   }];
-  return <div className={`${className} bg-background shrink-0 text-foreground transition-all duration-300 ${isOpen ? 'w-64' : 'w-0 lg:w-20'} lg:relative h-full z-40`}>
-      <div className="flex items-start justify-between h-16 px-4">
+  return <aside className={`${className} z-40 h-full shrink-0 overflow-hidden border-divider border-r bg-background text-foreground transition-all duration-300 ${isOpen ? 'w-64' : 'w-0 lg:w-20'}`}>
+      <div className="flex h-16 items-center justify-between px-4">
         <div className={`flex items-center ${isOpen ? '' : 'lg:justify-center'}`}>
-          <div className="h-8 w-8 rounded bg-[#0EA5E9] flex items-center justify-center font-bold">
-            E
-          </div>
-          {isOpen && <span className="ml-2 text-xl font-semibold">E-Admin</span>}
+          <img src="/logo.png" alt="E-Shop" className="h-10 w-10 object-contain" />
+          {isOpen && <span className="ml-2 text-xl font-semibold text-primary">E-Admin</span>}
         </div>
-        <button onClick={() => setIsOpen(!isOpen)} className="p-1 rounded-md hover:text-white  hidden lg:block" aria-label="Toggle sidebar width">
+        <button onClick={() => setIsOpen(!isOpen)} className="hidden rounded-md p-1 hover:bg-brand-surface hover:text-primary lg:block" aria-label="Toggle sidebar width">
           <ChevronLeftIcon size={20} className={`transition-transform ${isOpen ? '' : 'transform rotate-180'}`} />
         </button>
       </div>
       <nav className="mt-6">
         <ul className="space-y-2 px-2">
           {navItems.map(item => <li key={item.path}>
-              <Link href={item.path} className={`flex items-center p-3 rounded-md ${pathname.startsWith(item.path) ? 'bg-[#0EA5E9] bg-opacity-20 text-white' : 'hover:bg-[#F3F4F6]'} ${isOpen ? '' : 'lg:justify-center'}`}>
+              <Link href={item.path} className={`flex items-center p-3 rounded-md transition-colors ${pathname.startsWith(item.path) ? 'bg-primary text-white shadow-sm' : 'hover:bg-brand-surface hover:text-primary'} ${isOpen ? '' : 'lg:justify-center'}`}>
                 <span>{item.icon}</span>
                 {isOpen && <span className="ml-3">{item.name}</span>}
               </Link>
             </li>)}
         </ul>
       </nav>
-    </div>;
+    </aside>;
 };
