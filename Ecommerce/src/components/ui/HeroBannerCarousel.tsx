@@ -63,9 +63,13 @@ export default function HeroBannerCarousel({ banners }: HeroBannerCarouselProps)
   const banner = banners[current];
 
   return (
-    <section className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-100 shadow-sm">
+    <section
+      aria-label="Featured promotions"
+      aria-roledescription="carousel"
+      className="relative overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-950 shadow-sm sm:rounded-[2rem]"
+    >
       {/* Slides */}
-      <div className="relative min-h-[340px] sm:min-h-[420px] lg:min-h-[500px]">
+      <div className="relative min-h-[400px] sm:min-h-[420px] lg:min-h-[500px]">
         {/* Background image */}
         <div
           key={banner.id}
@@ -79,33 +83,37 @@ export default function HeroBannerCarousel({ banners }: HeroBannerCarouselProps)
               className="h-full w-full object-cover object-center"
             />
           )}
-          {/* Gradient overlay for text legibility */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+          {/* Mobile copy sits at the bottom; desktop copy stays left aligned. */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/5 sm:bg-gradient-to-r sm:from-black/70 sm:via-black/30 sm:to-transparent" />
         </div>
 
         {/* Text content */}
         <div
-          className="relative flex h-full min-h-[340px] flex-col justify-center px-8 py-12 sm:min-h-[420px] sm:px-14 lg:min-h-[500px] lg:max-w-2xl lg:px-20"
+          className="relative flex h-full min-h-[400px] flex-col justify-end px-5 pb-14 pt-24 sm:min-h-[420px] sm:justify-center sm:px-14 sm:py-12 lg:min-h-[500px] lg:max-w-2xl lg:px-20"
           style={{
             opacity: isAnimating ? 0 : 1,
             transform: isAnimating ? 'translateX(-12px)' : 'translateX(0)',
             transition: 'opacity 0.4s ease, transform 0.4s ease',
           }}
         >
-          <h1 className="text-3xl font-bold leading-tight tracking-tight text-white drop-shadow sm:text-4xl lg:text-5xl">
+          <p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-white/70 sm:hidden">
+            Featured collection
+          </p>
+          <h1 className="max-w-[17rem] text-[1.75rem] font-bold leading-[1.08] tracking-tight text-white drop-shadow-sm sm:max-w-none sm:text-4xl lg:text-5xl">
             {banner.title}
           </h1>
           {banner.subtitle && (
-            <p className="mt-4 max-w-md text-base leading-relaxed text-white/80 sm:text-lg">
+            <p className="mt-3 line-clamp-2 max-w-[19rem] text-sm leading-6 text-white/75 sm:mt-4 sm:max-w-md sm:text-lg sm:leading-relaxed">
               {banner.subtitle}
             </p>
           )}
           {banner.button_label && banner.button_link && (
             <Link
               href={banner.button_link}
-              className="mt-7 inline-flex w-fit items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow transition hover:bg-slate-100 active:scale-95 sm:text-base"
+              className="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black shadow-sm transition hover:bg-orange-50 active:scale-95 sm:mt-7 sm:rounded-xl sm:px-6 sm:py-3 sm:text-base"
             >
               {banner.button_label}
+              <FiChevronRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           )}
         </div>
@@ -114,30 +122,34 @@ export default function HeroBannerCarousel({ banners }: HeroBannerCarouselProps)
       {/* Nav arrows — only show when more than 1 banner */}
       {count > 1 && (
         <>
-          <button
-            onClick={() => { prev(); resetAutoplay(); }}
-            aria-label="Previous banner"
-            className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md backdrop-blur transition hover:bg-white active:scale-90 sm:left-5 sm:p-3"
-          >
-            <FiChevronLeft className="h-5 w-5 text-slate-800 sm:h-6 sm:w-6" />
-          </button>
-          <button
-            onClick={() => { next(); resetAutoplay(); }}
-            aria-label="Next banner"
-            className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md backdrop-blur transition hover:bg-white active:scale-90 sm:right-5 sm:p-3"
-          >
-            <FiChevronRight className="h-5 w-5 text-slate-800 sm:h-6 sm:w-6" />
-          </button>
+          <div className="absolute right-4 top-4 z-10 flex items-center rounded-full border border-white/15 bg-black/30 p-1 shadow-lg backdrop-blur-md sm:contents">
+            <button
+              onClick={() => { prev(); resetAutoplay(); }}
+              aria-label="Previous banner"
+              className="rounded-full p-2 text-white transition hover:bg-white/20 active:scale-90 sm:absolute sm:left-5 sm:top-1/2 sm:-translate-y-1/2 sm:bg-white/80 sm:p-3 sm:text-black sm:shadow-md sm:backdrop-blur sm:hover:bg-white"
+            >
+              <FiChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+            <span className="h-4 w-px bg-white/20 sm:hidden" aria-hidden="true" />
+            <button
+              onClick={() => { next(); resetAutoplay(); }}
+              aria-label="Next banner"
+              className="rounded-full p-2 text-white transition hover:bg-white/20 active:scale-90 sm:absolute sm:right-5 sm:top-1/2 sm:-translate-y-1/2 sm:bg-white/80 sm:p-3 sm:text-black sm:shadow-md sm:backdrop-blur sm:hover:bg-white"
+            >
+              <FiChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+          </div>
 
           {/* Dot indicators */}
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+          <div className="absolute bottom-5 left-5 flex gap-1.5 sm:bottom-4 sm:left-1/2 sm:-translate-x-1/2 sm:gap-2">
             {banners.map((_, i) => (
               <button
                 key={i}
                 onClick={() => { goTo(i); resetAutoplay(); }}
                 aria-label={`Go to banner ${i + 1}`}
-                className={`h-2 rounded-full transition-all ${
-                  i === current ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/75'
+                aria-current={i === current ? 'true' : undefined}
+                className={`h-1 rounded-full transition-all sm:h-2 ${
+                  i === current ? 'w-7 bg-white sm:w-6' : 'w-3 bg-white/35 hover:bg-white/70 sm:w-2'
                 }`}
               />
             ))}
