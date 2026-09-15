@@ -13,10 +13,10 @@ import HeroBannerCarousel, { Banner } from '@/components/ui/HeroBannerCarousel';
 import { useAuth } from '@/hooks/useAuth';
 
 const categories = [
-  { name: 'Electronics', slug: 'electronics', description: 'Everyday tech, made simple.', accent: 'bg-violet-100 text-violet-950' },
-  { name: 'Clothing', slug: 'clothing', description: 'Easy pieces for every day.', accent: 'bg-rose-100 text-rose-950' },
-  { name: 'Accessories', slug: 'accessories', description: 'The details that pull it together.', accent: 'bg-amber-100 text-amber-950' },
-  { name: 'Home & Kitchen', slug: 'home', description: 'Small upgrades for your space.', accent: 'bg-emerald-100 text-emerald-950' },
+  { name: 'Electronics', slug: 'electronics', description: 'Everyday tech, made simple.' },
+  { name: 'Clothing', slug: 'clothing', description: 'Easy pieces for every day.' },
+  { name: 'Accessories', slug: 'accessories', description: 'The details that pull it together.' },
+  { name: 'Home & Kitchen', slug: 'home', description: 'Small upgrades for your space.' },
 ];
 
 const formatPrice = (price: Product['price']) => `$${Number(price || 0).toFixed(2)}`;
@@ -72,7 +72,27 @@ export default function Home() {
       <section className="hidden sm:block">
         <div className="mb-7 flex items-end justify-between gap-4"><div><p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-primary-light">Browse with ease</p><h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Shop by category</h2></div><Link href="/products" className="hidden items-center text-sm font-semibold text-slate-700 hover:text-primary dark:text-slate-200 dark:hover:text-primary-light sm:flex">View everything <FiArrowRight className="ml-1" /></Link></div>
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {categories.map((category) => <Link key={category.slug} href={`/products?category=${category.slug}`} className={`group flex min-h-36 flex-col rounded-2xl p-4 transition duration-300 hover:-translate-y-1 hover:shadow-lg sm:min-h-44 sm:rounded-3xl sm:p-6 ${category.accent}`}><FiPackage className="h-5 w-5 sm:h-6 sm:w-6" /><div className="mt-auto flex items-end justify-between gap-2 pt-6 sm:gap-3"><div className="min-w-0"><h3 className="text-base font-semibold leading-tight sm:text-lg">{category.name}</h3><p className="mt-1 hidden text-sm opacity-70 min-[400px]:line-clamp-2">{category.description}</p></div><FiArrowRight className="mb-1 shrink-0 transition-transform group-hover:translate-x-1" /></div></Link>)}
+          {categories.map((category) => (
+            <Link
+              key={category.slug}
+              href={`/products?category=${category.slug}`}
+              className="group relative flex min-h-36 flex-col overflow-hidden rounded-2xl border border-orange-100 bg-[#fff8f3] p-4 text-slate-950 transition duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg hover:shadow-orange-950/5 dark:border-orange-900/50 dark:bg-slate-900 dark:text-white dark:hover:border-primary sm:min-h-44 sm:rounded-3xl sm:p-6"
+            >
+              <span className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-orange-200/40 transition-transform duration-500 group-hover:scale-125 dark:bg-primary/10" aria-hidden="true" />
+              <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-sm shadow-orange-950/20 dark:bg-primary-light dark:text-slate-950">
+                <FiPackage className="h-5 w-5" />
+              </span>
+              <div className="relative mt-auto flex items-end justify-between gap-2 pt-6 sm:gap-3">
+                <div className="min-w-0">
+                  <h3 className="text-base font-semibold leading-tight sm:text-lg">{category.name}</h3>
+                  <p className="mt-1 hidden text-sm text-slate-600 dark:text-slate-400 min-[400px]:line-clamp-2">{category.description}</p>
+                </div>
+                <span className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-orange-200 text-primary transition group-hover:border-primary group-hover:bg-primary group-hover:text-white dark:border-orange-900 dark:text-primary-light">
+                  <FiArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
       </ScrollReveal>

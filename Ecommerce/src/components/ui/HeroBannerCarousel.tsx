@@ -110,7 +110,7 @@ export default function HeroBannerCarousel({ banners }: HeroBannerCarouselProps)
           {banner.button_label && banner.button_link && (
             <Link
               href={banner.button_link}
-              className="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black shadow-sm transition hover:bg-orange-50 active:scale-95 sm:mt-7 sm:rounded-xl sm:px-6 sm:py-3 sm:text-base"
+              className="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-[#ffffff] px-5 py-2.5 text-sm font-semibold text-[#0f172a] shadow-sm transition hover:bg-orange-50 active:scale-95 dark:bg-primary dark:text-white dark:hover:bg-primary-light dark:hover:text-slate-950 sm:mt-7 sm:rounded-xl sm:px-6 sm:py-3 sm:text-base"
             >
               {banner.button_label}
               <FiChevronRight className="h-4 w-4" aria-hidden="true" />
