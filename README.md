@@ -32,8 +32,8 @@ For the Vercel + Render + Supabase production setup, see [DEPLOYMENT.md](DEPLOYM
    ```
 
 4. Open your browser and navigate to
-   - `http://localhost:3001` for the Ecommerce
-   - `http://localhost:3000` for the Admin Panel
+   - `http://localhost:3001` for the Admin Panel
+   - `http://localhost:3000` for the Ecommerce
 
 ## Google sign-in setup
 
